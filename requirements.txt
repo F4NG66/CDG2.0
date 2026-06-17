@@ -1,0 +1,6 @@
+torch>=2.1
+transformers              # LLaDA  4.38.2；Dream  4.46.2（
+safetensors
+numpy
+requests                  # DeepSeek judge
+huggingface_hub           # SAE
