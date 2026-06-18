@@ -51,6 +51,13 @@ class RecordConfig:
     pool: str = "mean"               # pooling over positions: "mean" | "none"
     scopes: tuple[Scope, ...] = DEFAULT_SCOPES
     decode_regions: bool = True      # also store decoded text per region/frac
+    # When True: at token_record_fraction (default 1.0 = fully decoded output),
+    # for unmask-position scopes, store per-token sparse SAE activations in
+    # GenerationRecord.sae_tokens.  Off by default for backward compatibility.
+    # Use frac=1.0 for annotation (fully decoded content), NOT main_fraction=0.10
+    # (which captures EOS padding tokens filled early by the diffusion model).
+    record_token_level: bool = False
+    token_record_fraction: float = 1.0  # fraction at which to record token-level data
 
 
 @dataclass

@@ -102,9 +102,18 @@ def _load_file(path: str, variant: str) -> list[PromptCase]:
     if path.endswith(".json"):
         with open(path) as f:
             obj = json.load(f)
+        if isinstance(obj, dict):
+            return [_case_from_dict(obj, variant, stem, 0)]
         if isinstance(obj, list):
-            return [_case_from_dict(d, variant, stem, i) for i, d in enumerate(obj)]
-        return [_case_from_dict(obj, variant, stem, 0)]
+            # Flatten one level of accidental nesting: [[{...}], {...}] → [{...}, {...}]
+            flat = []
+            for item in obj:
+                if isinstance(item, list):
+                    flat.extend(item)
+                else:
+                    flat.append(item)
+            return [_case_from_dict(d, variant, stem, i)
+                    for i, d in enumerate(flat) if isinstance(d, dict)]
     if path.endswith(".txt"):
         with open(path) as f:
             txt = f.read().strip()

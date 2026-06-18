@@ -31,6 +31,10 @@ class GenerationRecord:
     counts: dict = field(default_factory=dict)         # scope -> frac -> n_pos
     decoded: dict = field(default_factory=dict)        # region -> frac -> text
     judge: Optional[dict] = None
+    # Token-level sparse SAE activations (only when RecordConfig.record_token_level=True).
+    # scope -> layer -> {"token_ids": int32[T], "idx": int32[T,k], "val": f16[T,k]}
+    # Recorded only at main_fraction for unmask-position scopes (pos == "unmask").
+    sae_tokens: dict = field(default_factory=dict)
 
 
 class Recorder:
@@ -137,6 +141,24 @@ class Recorder:
                 else:
                     sae_store[layer] = z.half().cpu()
                     hid_store[layer] = h_sel.half().cpu()
+
+                # Token-level sparse activations: only at token_record_fraction
+                # (default 1.0 = fully decoded output, real content tokens),
+                # only for unmask-position scopes, only when enabled.
+                # Do NOT use main_fraction here: at frac=0.10 the diffusion model
+                # has already filled EOS padding with high confidence, so unmask
+                # positions are dominated by <|endoftext|> tokens, not content.
+                if (self.cfg.record_token_level
+                        and sc.pos == "unmask"
+                        and abs(frac - self.cfg.token_record_fraction) < 1e-6):
+                    k_top = min(sae.k, z.shape[-1])
+                    topv, topi = torch.topk(z, k_top, dim=-1)  # (m, k)
+                    tok_store = self.rec.sae_tokens.setdefault(sc.name, {})
+                    tok_store[layer] = {
+                        "token_ids": x_row[idx].int().cpu(),   # (m,)
+                        "idx": topi.int().cpu(),               # (m, k)
+                        "val": topv.half().cpu(),              # (m, k)
+                    }
 
         # decode each region's current content (for inspection / judge)
         if self.cfg.decode_regions and self.tok is not None:

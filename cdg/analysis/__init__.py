@@ -1,7 +1,7 @@
-"""cdg.analysis – re-exports the real analysis functions from probe / interpret.
+"""cdg.analysis – analysis functions + transcriptomics-style SAE analysis.
 
-Kept as a thin facade so existing import paths work:
-    from cdg.analysis import load_records, delta_vector, feature_atlas, steering_defense
+Existing facade for probe/interpret/steering (backward-compatible).
+New io layer: pseudobulk_matrix, singlecell_matrix (from cdg.analysis.io).
 """
 from ..probe import (
     load_records,
@@ -43,6 +43,13 @@ def steering_defense(out_dir, model_name, *, scope="tpl_mask", space="hidden",
     return sv.as_runner_dict(normalize=True)
 
 
+from .io import (
+    load_manifest,
+    load_record,
+    pseudobulk_matrix,
+    singlecell_matrix,
+)
+
 __all__ = [
     "load_records",
     "top_separating_features", "top_diff_features", "diff_feature_matrix",
@@ -51,4 +58,6 @@ __all__ = [
     "mechanism_summary", "print_feature_report", "save_atlas",
     "build_steering_vectors", "build_did_vectors", "SteeringVectors",
     "delta_vector", "steering_defense",
+    # transcriptomics io
+    "load_manifest", "load_record", "pseudobulk_matrix", "singlecell_matrix",
 ]

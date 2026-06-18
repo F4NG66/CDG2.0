@@ -49,6 +49,11 @@ def main():
                     help="tiny CPU fake model: exercises the full pipeline")
     ap.add_argument("--limit", type=int, default=0,
                     help="cap cases per group (0 = all)")
+    # token-level SAE recording (for Module 4 annotation; adds ~50-100 KB/gen)
+    ap.add_argument("--record-token-level", action="store_true",
+                    help="Store per-token sparse SAE activations (sae_tokens) "
+                         "for annotation (Module 4 / s11_annotate.py). "
+                         "Recorded at frac=1.0 (fully decoded output) by default.")
     # judge
     ap.add_argument("--judge", action="store_true", help="run the DeepSeek judge")
     ap.add_argument("--judge-template",
@@ -60,6 +65,8 @@ def main():
     args = ap.parse_args()
 
     cfg = get_backend_config(args.backend)
+    if args.record_token_level:
+        cfg.record.record_token_level = True
     runner = build_runner(cfg, sae_root=args.sae_root, device=args.device,
                           dummy=args.dummy)
     tok = getattr(runner, "tokenizer", None)

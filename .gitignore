@@ -4,3 +4,11 @@
 __pycache__/
 *.pyc
 .DS_Store
+*.npy
+*.png
+*.csv
+outputs/
+analysis_output/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
