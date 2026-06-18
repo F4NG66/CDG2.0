@@ -54,7 +54,7 @@ def main():
     ap.add_argument("--judge-template",
                     choices=["injection", "jailbreak", "sycophancy"],
                     default="injection")
-    ap.add_argument("--judge-model", default="deepseek-v4-pro")
+    ap.add_argument("--judge-model", default="deepseek-v4-flash")
     ap.add_argument("--judge-groups", default="B",
                     help="comma list of group letters to judge (default B only)")
     args = ap.parse_args()

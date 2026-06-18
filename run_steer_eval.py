@@ -103,7 +103,7 @@ def main():
     # judge
     ap.add_argument("--judge", action="store_true")
     ap.add_argument("--judge-template", default="injection")
-    ap.add_argument("--judge-model", default="deepseek-v4-pro")
+    ap.add_argument("--judge-model", default="deepseek-v4-flash")
     args = ap.parse_args()
 
     cfg = get_backend_config(args.backend)

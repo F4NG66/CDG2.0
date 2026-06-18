@@ -43,7 +43,8 @@ class DLMRunner:
         self.hooks = HookManager(self.model, cfg.record_layers,
                                  offset=cfg.layer_to_block_offset,
                                  blocks_attr=cfg.blocks_attr)
-        self._steer = None   # set via set_steering(...)
+        self._steer = None       # direction steering; set via set_steering(...)
+        self._feat_steer = None  # feature-zeroing;  set via set_feature_zero_steering(...)
 
     def set_steering(self, vectors: dict, alpha: float, scope_region: str = "template",
                      pos: str = "mask"):
@@ -56,6 +57,28 @@ class DLMRunner:
     def clear_steering(self):
         self._steer = None
         self.hooks.reset_steer()
+
+    def set_feature_zero_steering(self, feature_map: dict, scope_region: str = "template",
+                                   pos: str = "mask"):
+        """Feature-zeroing steering mode.
+
+        Args:
+            feature_map: {layer:int -> list[int]}  SAE feature indices to suppress per layer.
+                         The SAE bundle to use is inferred from the scope's sae_kind.
+            scope_region: which region to restrict zeroing to ("template" | "output" | ...)
+            pos: within the region, which positions ("mask" | "unmask" | "all")
+        """
+        from ..config import DEFAULT_SCOPES
+        _scope_kind = {sc.region: sc.sae_kind for sc in DEFAULT_SCOPES}
+        _bundles_by_kind = {b.kind: b for b in self.bundles}
+        sae_kind = _scope_kind.get(scope_region, "mask")
+        bundle = _bundles_by_kind.get(sae_kind) or (self.bundles[0] if self.bundles else None)
+        self._feat_steer = dict(feature_map=feature_map, bundle=bundle,
+                                scope_region=scope_region, pos=pos)
+
+    def clear_feature_zero_steering(self):
+        self._feat_steer = None
+        self.hooks.reset_feature_zero()
 
     # -- setup --------------------------------------------------------------
     def _load_model(self):
@@ -174,23 +197,50 @@ class DLMRunner:
                 posmask = torch.zeros((1, total), dtype=torch.bool, device=self.device)
                 posmask[0, lo:hi] = local
                 
+                # scope -> sae_kind mapping (used to pick the right bundle)
+                from ..config import DEFAULT_SCOPES
+                _scope_kind = {sc.name: sc.sae_kind for sc in DEFAULT_SCOPES}
+                _bundles_by_kind = {b.kind: b for b in self.bundles}
+
                 for layer, vec in st["vectors"].items():
                     vec_tensor = torch.as_tensor(vec, device=self.device)
                     hidden_size = getattr(self.model.config, "hidden_size", 4096)
-                    
-                    if vec_tensor.shape[0] > hidden_size and self.bundles:
-                        sae = self.bundles[0].saes.get(layer)
+
+                    if vec_tensor.shape[0] > hidden_size:
+                        # SAE feature-space vector → project back to residual space.
+                        # Use the bundle whose kind matches the scope; fall back to first.
+                        sae_kind = _scope_kind.get(st.get("scope_region", ""), None)
+                        bundle = (_bundles_by_kind.get(sae_kind)
+                                  or (self.bundles[0] if self.bundles else None))
+                        sae = bundle.saes.get(layer) if bundle else None
                         if sae is not None:
-                            if hasattr(sae, "W_dec"):
-            
-                                vec_tensor = (vec_tensor.to(sae.W_dec.dtype) @ sae.W_dec.T).view(-1)
-                            elif hasattr(sae, "decode"):
-                                with torch.no_grad():
-                                    vec_tensor = sae.decode(vec_tensor.view(1, -1)).view(-1)
-                                    
+                            # Correct projection: v_sae @ W_dec.T  (b_dec cancels in a diff vec)
+                            # W_dec shape: (d_model, n_features); W_dec.T: (n_features, d_model)
+                            vec_tensor = (vec_tensor.float() @ sae.W_dec.float().T).view(-1)
+
                     self.hooks.set_steer(layer, st["alpha"],
                                          vec_tensor.to(torch.bfloat16),
                                          positions=posmask)
+
+        # optional feature-zeroing steering
+        if self._feat_steer is not None:
+            self.hooks.reset_feature_zero()
+            fs = self._feat_steer
+            span = regions.get(fs["scope_region"])
+            if span is not None:
+                lo, hi = span
+                seg = x[0, lo:hi]
+                is_mask = (seg == self.mask_id)
+                local = (is_mask if fs["pos"] == "mask"
+                         else ~is_mask if fs["pos"] == "unmask"
+                         else torch.ones_like(is_mask))
+                posmask = torch.zeros((1, total), dtype=torch.bool, device=self.device)
+                posmask[0, lo:hi] = local
+                bundle = fs.get("bundle")
+                for layer, feat_ids in fs["feature_map"].items():
+                    sae = bundle.saes.get(layer) if bundle else None
+                    if sae is not None:
+                        self.hooks.set_feature_zero(layer, sae, feat_ids, positions=posmask)
 
         x = denoise(self, x, attn, steps=dc.steps, gen_length=dc.gen_length,
                     prompt_len=P, block_length=dc.block_length,

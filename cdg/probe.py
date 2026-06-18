@@ -264,6 +264,110 @@ def top_separating_features(records, *, scope, frac, layer,
             "features": feats}
 
 
+def top_diff_features(
+    records,
+    *,
+    scope: str = "tpl_mask",
+    fracs: Optional[tuple] = None,
+    layers: Optional[tuple] = None,
+    pairs: tuple = (("B", "C"), ("A", "B"), ("C", "D")),
+    k: int = 30,
+    stat: str = "mean_gap",
+) -> list[dict]:
+    """Sweep over (layer × frac × group_pair) and return the top-k differentially
+    activated SAE features for each combination.
+
+    Args:
+        pairs: group-letter pairs to compare, e.g. ("B","C") = harmful-inj vs neutral-inj.
+               The gap is signed: positive = first group fires more.
+        stat:  "mean_gap"  - difference of per-group mean activations (default)
+               "t_stat"    - Welch t-statistic (more robust for unequal sizes)
+
+    Returns:
+        list of dicts, one per (layer, frac, pair) entry that has data.
+        Each dict has keys: layer, frac, pair, n_pos, n_neg, features (list of k dicts).
+    """
+    # discover available fracs/layers from first matching record
+    if fracs is None or layers is None:
+        for r in records:
+            rec = r.get("_rec")
+            if rec is None:
+                continue
+            store = rec.get("sae", {}).get(scope, {})
+            if store:
+                if fracs is None:
+                    fracs = tuple(sorted(float(f) for f in store))
+                if layers is None:
+                    any_frac = next(iter(store.values()))
+                    layers = tuple(sorted(any_frac.keys()))
+                break
+    if not fracs or not layers:
+        return []
+
+    rows = []
+    for layer in layers:
+        for frac in fracs:
+            for pos_grp, neg_grp in pairs:
+                Xp, _ = stack_group(records, groups=(pos_grp,), scope=scope,
+                                    frac=frac, layer=layer, space="sae")
+                Xn, _ = stack_group(records, groups=(neg_grp,), scope=scope,
+                                    frac=frac, layer=layer, space="sae")
+                if Xp is None or Xn is None:
+                    continue
+                mp = Xp.float().mean(0).numpy()
+                mn = Xn.float().mean(0).numpy()
+
+                if stat == "t_stat" and Xp.shape[0] > 1 and Xn.shape[0] > 1:
+                    sp = Xp.float().numpy()
+                    sn = Xn.float().numpy()
+                    var_p = sp.var(0) / sp.shape[0]
+                    var_n = sn.var(0) / sn.shape[0]
+                    denom = np.sqrt(var_p + var_n + 1e-12)
+                    score = (mp - mn) / denom
+                else:
+                    score = mp - mn
+
+                order = np.argsort(-np.abs(score))[:k]
+                feats = [
+                    {"feature": int(i),
+                     "score": float(score[i]),
+                     "pos_mean": float(mp[i]),
+                     "neg_mean": float(mn[i])}
+                    for i in order
+                ]
+                rows.append({
+                    "layer": int(layer), "frac": float(frac),
+                    "pair": f"{pos_grp}vs{neg_grp}",
+                    "pos_group": pos_grp, "neg_group": neg_grp,
+                    "stat": stat,
+                    "n_pos": int(Xp.shape[0]), "n_neg": int(Xn.shape[0]),
+                    "features": feats,
+                })
+    return rows
+
+
+def diff_feature_matrix(records, *, scope: str = "tpl_mask",
+                        frac: float = 0.10, layer: int = 16,
+                        pairs: tuple = (("B", "C"), ("A", "B"), ("C", "D")),
+                        k: int = 20) -> dict:
+    """Convenience: for a single (layer, frac), return a matrix view showing
+    the top-k features per pair side-by-side for quick comparison.
+
+    Returns dict with 'pairs' key and per-pair feature lists, plus a 'union'
+    list of feature indices that appear in ANY pair's top-k (useful for atlas).
+    """
+    rows = top_diff_features(records, scope=scope, fracs=(frac,), layers=(layer,),
+                             pairs=pairs, k=k)
+    union = set()
+    result = {}
+    for r in rows:
+        feat_ids = [f["feature"] for f in r["features"]]
+        result[r["pair"]] = r
+        union.update(feat_ids)
+    return {"layer": layer, "frac": frac, "scope": scope,
+            "pairs": result, "union_features": sorted(union)}
+
+
 def feature_atlas(sae, feature_ids) -> np.ndarray:
     """Cosine-similarity matrix between SAE decoder directions of `feature_ids`.
 
