@@ -182,11 +182,21 @@ class Recorder:
         m = self.rec.meta
         sub = os.path.join(out_dir, m["model_name"], m["variant"])
         os.makedirs(sub, exist_ok=True)
-        path = os.path.join(sub, f"{m['case_id']}__seed{m['seed']}.pt")
+        # Include steer_alpha in filename so repeated runs with different alpha
+        # values don't overwrite each other.
+        alpha_tag = ""
+        if m.get("steer_alpha") is not None:
+            alpha_tag = f"__a{m['steer_alpha']:.1f}"
+        path = os.path.join(sub, f"{m['case_id']}__seed{m['seed']}{alpha_tag}.pt")
         torch.save(self.rec.__dict__, path)
         row = {k: m.get(k) for k in
                ("case_id", "variant", "content_type", "has_template",
                 "attack_method", "is_neutral", "model_name", "seed")}
+        # Also persist steering metadata when present
+        for steer_key in ("steer_alpha", "steer_layer", "steer_direction",
+                          "steer_mode", "steer_scope_region", "steer_pos"):
+            if steer_key in m:
+                row[steer_key] = m[steer_key]
         row.update({"path": path,
                     "response_text": self.rec.response_text,
                     "regions": self.rec.regions,
