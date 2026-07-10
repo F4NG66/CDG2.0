@@ -12,3 +12,16 @@ analysis_output/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+
+# Dream / experiment safety
+*.pt
+*.bin
+*.safetensors
+.env
+.env.*
+logs/
+outputs*/
+outputs_*/
+analysis_output/*directions*/
+__pycache__/
+*.pyc

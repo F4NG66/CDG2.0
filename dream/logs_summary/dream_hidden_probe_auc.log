@@ -1,0 +1,241 @@
+loading records: 400
+grid points: 90
+
+CONTRAST B_vs_A_injection_harmful
+harm         f=0.05 L5  n=200 AUC=0.999±0.002 F1=0.995
+harm         f=0.05 L14 n=200 AUC=1.000±0.001 F1=0.985
+harm         f=0.05 L23 n=200 AUC=1.000±0.000 F1=0.995
+harm         f=0.1  L5  n=200 AUC=0.997±0.005 F1=0.995
+harm         f=0.1  L14 n=200 AUC=0.993±0.015 F1=0.980
+harm         f=0.1  L23 n=200 AUC=1.000±0.001 F1=0.990
+harm         f=0.2  L5  n=200 AUC=0.999±0.002 F1=0.990
+harm         f=0.2  L14 n=200 AUC=1.000±0.001 F1=0.980
+harm         f=0.2  L23 n=200 AUC=1.000±0.000 F1=0.995
+harm         f=0.35 L5  n=200 AUC=0.991±0.011 F1=0.990
+harm         f=0.35 L14 n=200 AUC=0.996±0.007 F1=0.985
+harm         f=0.35 L23 n=200 AUC=0.998±0.003 F1=0.980
+harm         f=0.5  L5  n=200 AUC=0.997±0.005 F1=0.995
+harm         f=0.5  L14 n=200 AUC=0.992±0.012 F1=0.980
+harm         f=0.5  L23 n=200 AUC=1.000±0.000 F1=0.985
+harm         f=1.0  L5  n=200 AUC=0.996±0.005 F1=0.980
+harm         f=1.0  L14 n=200 AUC=0.996±0.006 F1=0.985
+harm         f=1.0  L23 n=200 AUC=0.995±0.011 F1=0.980
+out_mask     f=0.05 L5  n=200 AUC=1.000±0.001 F1=0.990
+out_mask     f=0.05 L14 n=200 AUC=0.998±0.003 F1=0.995
+out_mask     f=0.05 L23 n=200 AUC=1.000±0.000 F1=0.995
+out_mask     f=0.1  L5  n=200 AUC=0.999±0.002 F1=0.995
+out_mask     f=0.1  L14 n=200 AUC=0.992±0.017 F1=0.990
+out_mask     f=0.1  L23 n=200 AUC=1.000±0.000 F1=0.995
+out_mask     f=0.2  L5  n=200 AUC=1.000±0.001 F1=0.995
+out_mask     f=0.2  L14 n=200 AUC=1.000±0.000 F1=0.995
+out_mask     f=0.2  L23 n=200 AUC=1.000±0.000 F1=0.995
+out_mask     f=0.35 L5  n=200 AUC=0.997±0.006 F1=0.995
+out_mask     f=0.35 L14 n=200 AUC=0.996±0.006 F1=0.970
+out_mask     f=0.35 L23 n=200 AUC=1.000±0.001 F1=0.995
+out_mask     f=0.5  L5  n=200 AUC=0.998±0.004 F1=0.990
+out_mask     f=0.5  L14 n=200 AUC=0.999±0.002 F1=0.995
+out_mask     f=0.5  L23 n=200 AUC=0.998±0.002 F1=0.990
+out_unmask   f=0.05 L5  n=199 AUC=1.000±0.000 F1=0.990
+out_unmask   f=0.05 L14 n=199 AUC=1.000±0.001 F1=0.990
+out_unmask   f=0.05 L23 n=199 AUC=1.000±0.000 F1=0.990
+out_unmask   f=0.1  L5  n=200 AUC=0.999±0.002 F1=0.995
+out_unmask   f=0.1  L14 n=200 AUC=0.987±0.026 F1=0.970
+out_unmask   f=0.1  L23 n=200 AUC=0.996±0.007 F1=0.995
+out_unmask   f=0.2  L5  n=200 AUC=0.998±0.003 F1=0.995
+out_unmask   f=0.2  L14 n=200 AUC=1.000±0.000 F1=1.000
+out_unmask   f=0.2  L23 n=200 AUC=0.999±0.002 F1=0.985
+out_unmask   f=0.35 L5  n=200 AUC=0.997±0.006 F1=0.990
+out_unmask   f=0.35 L14 n=200 AUC=0.997±0.006 F1=0.985
+out_unmask   f=0.35 L23 n=200 AUC=0.995±0.010 F1=0.990
+out_unmask   f=0.5  L5  n=200 AUC=0.998±0.003 F1=0.995
+out_unmask   f=0.5  L14 n=200 AUC=0.998±0.004 F1=0.990
+out_unmask   f=0.5  L23 n=200 AUC=0.997±0.006 F1=0.995
+out_unmask   f=1.0  L5  n=200 AUC=0.997±0.005 F1=0.995
+out_unmask   f=1.0  L14 n=200 AUC=0.989±0.014 F1=0.975
+out_unmask   f=1.0  L23 n=200 AUC=0.989±0.013 F1=0.985
+
+CONTRAST C_vs_D_injection_neutral
+harm         f=0.05 L5  n=200 AUC=1.000±0.000 F1=0.995
+harm         f=0.05 L14 n=200 AUC=0.996±0.005 F1=0.975
+harm         f=0.05 L23 n=200 AUC=1.000±0.000 F1=0.980
+harm         f=0.1  L5  n=200 AUC=1.000±0.000 F1=0.990
+harm         f=0.1  L14 n=200 AUC=1.000±0.001 F1=0.985
+harm         f=0.1  L23 n=200 AUC=1.000±0.001 F1=0.990
+harm         f=0.2  L5  n=200 AUC=1.000±0.000 F1=0.995
+harm         f=0.2  L14 n=200 AUC=0.986±0.017 F1=0.965
+harm         f=0.2  L23 n=200 AUC=1.000±0.000 F1=0.980
+harm         f=0.35 L5  n=200 AUC=1.000±0.000 F1=0.990
+harm         f=0.35 L14 n=200 AUC=1.000±0.000 F1=0.985
+harm         f=0.35 L23 n=200 AUC=1.000±0.000 F1=0.995
+harm         f=0.5  L5  n=200 AUC=0.998±0.003 F1=0.990
+harm         f=0.5  L14 n=200 AUC=0.999±0.001 F1=0.985
+harm         f=0.5  L23 n=200 AUC=1.000±0.001 F1=0.995
+harm         f=1.0  L5  n=200 AUC=1.000±0.000 F1=1.000
+harm         f=1.0  L14 n=200 AUC=0.997±0.004 F1=0.960
+harm         f=1.0  L23 n=200 AUC=0.999±0.002 F1=0.985
+out_mask     f=0.05 L5  n=200 AUC=1.000±0.000 F1=0.995
+out_mask     f=0.05 L14 n=200 AUC=0.997±0.004 F1=0.980
+out_mask     f=0.05 L23 n=200 AUC=1.000±0.000 F1=1.000
+out_mask     f=0.1  L5  n=200 AUC=1.000±0.000 F1=0.990
+out_mask     f=0.1  L14 n=200 AUC=1.000±0.000 F1=0.990
+out_mask     f=0.1  L23 n=200 AUC=1.000±0.000 F1=0.995
+out_mask     f=0.2  L5  n=200 AUC=1.000±0.001 F1=0.990
+out_mask     f=0.2  L14 n=200 AUC=0.995±0.010 F1=0.990
+out_mask     f=0.2  L23 n=200 AUC=1.000±0.000 F1=0.990
+out_mask     f=0.35 L5  n=200 AUC=1.000±0.000 F1=0.980
+out_mask     f=0.35 L14 n=200 AUC=1.000±0.000 F1=0.990
+out_mask     f=0.35 L23 n=200 AUC=1.000±0.000 F1=0.995
+out_mask     f=0.5  L5  n=200 AUC=0.998±0.003 F1=0.985
+out_mask     f=0.5  L14 n=200 AUC=1.000±0.000 F1=0.990
+out_mask     f=0.5  L23 n=200 AUC=0.998±0.003 F1=0.990
+out_unmask   f=0.05 L5  n=200 AUC=1.000±0.000 F1=0.995
+out_unmask   f=0.05 L14 n=200 AUC=0.991±0.011 F1=0.975
+out_unmask   f=0.05 L23 n=200 AUC=1.000±0.001 F1=0.980
+out_unmask   f=0.1  L5  n=200 AUC=1.000±0.000 F1=1.000
+out_unmask   f=0.1  L14 n=200 AUC=0.998±0.003 F1=0.970
+out_unmask   f=0.1  L23 n=200 AUC=1.000±0.001 F1=0.990
+out_unmask   f=0.2  L5  n=200 AUC=0.999±0.002 F1=0.985
+out_unmask   f=0.2  L14 n=200 AUC=0.997±0.004 F1=0.975
+out_unmask   f=0.2  L23 n=200 AUC=0.998±0.002 F1=0.970
+out_unmask   f=0.35 L5  n=200 AUC=1.000±0.000 F1=0.990
+out_unmask   f=0.35 L14 n=200 AUC=1.000±0.000 F1=0.985
+out_unmask   f=0.35 L23 n=200 AUC=1.000±0.000 F1=0.990
+out_unmask   f=0.5  L5  n=200 AUC=0.997±0.005 F1=0.985
+out_unmask   f=0.5  L14 n=200 AUC=0.998±0.003 F1=0.990
+out_unmask   f=0.5  L23 n=200 AUC=0.998±0.004 F1=0.990
+out_unmask   f=1.0  L5  n=200 AUC=1.000±0.000 F1=0.980
+out_unmask   f=1.0  L14 n=200 AUC=0.989±0.021 F1=0.965
+out_unmask   f=1.0  L23 n=200 AUC=0.996±0.008 F1=0.995
+
+CONTRAST B_vs_C_content_injected
+harm         f=0.05 L5  n=200 AUC=1.000±0.000 F1=0.995
+harm         f=0.05 L14 n=200 AUC=1.000±0.001 F1=0.990
+harm         f=0.05 L23 n=200 AUC=1.000±0.001 F1=0.990
+harm         f=0.1  L5  n=200 AUC=1.000±0.000 F1=1.000
+harm         f=0.1  L14 n=200 AUC=1.000±0.000 F1=0.990
+harm         f=0.1  L23 n=200 AUC=1.000±0.001 F1=0.985
+harm         f=0.2  L5  n=200 AUC=1.000±0.000 F1=0.995
+harm         f=0.2  L14 n=200 AUC=0.998±0.003 F1=0.985
+harm         f=0.2  L23 n=200 AUC=0.998±0.003 F1=0.990
+harm         f=0.35 L5  n=200 AUC=1.000±0.000 F1=0.990
+harm         f=0.35 L14 n=200 AUC=1.000±0.001 F1=0.995
+harm         f=0.35 L23 n=200 AUC=1.000±0.001 F1=0.990
+harm         f=0.5  L5  n=200 AUC=1.000±0.000 F1=0.995
+harm         f=0.5  L14 n=200 AUC=1.000±0.001 F1=0.985
+harm         f=0.5  L23 n=200 AUC=1.000±0.001 F1=0.985
+harm         f=1.0  L5  n=200 AUC=1.000±0.000 F1=1.000
+harm         f=1.0  L14 n=200 AUC=0.999±0.001 F1=0.980
+harm         f=1.0  L23 n=200 AUC=0.999±0.001 F1=0.975
+out_mask     f=0.05 L5  n=200 AUC=1.000±0.001 F1=0.990
+out_mask     f=0.05 L14 n=200 AUC=0.998±0.002 F1=0.975
+out_mask     f=0.05 L23 n=200 AUC=0.998±0.002 F1=0.960
+out_mask     f=0.1  L5  n=200 AUC=0.997±0.005 F1=0.975
+out_mask     f=0.1  L14 n=200 AUC=0.997±0.006 F1=0.960
+out_mask     f=0.1  L23 n=200 AUC=0.997±0.005 F1=0.975
+out_mask     f=0.2  L5  n=200 AUC=0.998±0.002 F1=0.980
+out_mask     f=0.2  L14 n=200 AUC=0.993±0.006 F1=0.960
+out_mask     f=0.2  L23 n=200 AUC=0.998±0.002 F1=0.980
+out_mask     f=0.35 L5  n=200 AUC=0.998±0.002 F1=0.980
+out_mask     f=0.35 L14 n=200 AUC=0.996±0.005 F1=0.970
+out_mask     f=0.35 L23 n=200 AUC=0.998±0.003 F1=0.975
+out_mask     f=0.5  L5  n=200 AUC=1.000±0.000 F1=0.980
+out_mask     f=0.5  L14 n=200 AUC=0.982±0.015 F1=0.950
+out_mask     f=0.5  L23 n=200 AUC=0.999±0.001 F1=0.970
+out_unmask   f=0.05 L5  n=200 AUC=1.000±0.001 F1=0.970
+out_unmask   f=0.05 L14 n=200 AUC=0.980±0.019 F1=0.935
+out_unmask   f=0.05 L23 n=200 AUC=0.988±0.011 F1=0.925
+out_unmask   f=0.1  L5  n=200 AUC=1.000±0.001 F1=0.985
+out_unmask   f=0.1  L14 n=200 AUC=0.985±0.007 F1=0.935
+out_unmask   f=0.1  L23 n=200 AUC=0.992±0.006 F1=0.955
+out_unmask   f=0.2  L5  n=200 AUC=1.000±0.001 F1=0.975
+out_unmask   f=0.2  L14 n=200 AUC=0.973±0.010 F1=0.915
+out_unmask   f=0.2  L23 n=200 AUC=0.989±0.007 F1=0.960
+out_unmask   f=0.35 L5  n=200 AUC=0.998±0.003 F1=0.985
+out_unmask   f=0.35 L14 n=200 AUC=0.991±0.012 F1=0.940
+out_unmask   f=0.35 L23 n=200 AUC=0.996±0.005 F1=0.960
+out_unmask   f=0.5  L5  n=200 AUC=0.998±0.003 F1=0.985
+out_unmask   f=0.5  L14 n=200 AUC=0.977±0.007 F1=0.900
+out_unmask   f=0.5  L23 n=200 AUC=0.995±0.004 F1=0.950
+out_unmask   f=1.0  L5  n=200 AUC=0.989±0.015 F1=0.940
+out_unmask   f=1.0  L14 n=200 AUC=0.944±0.034 F1=0.889
+out_unmask   f=1.0  L23 n=200 AUC=0.970±0.028 F1=0.935
+tpl_ctx      f=0.05 L5  n=200 AUC=1.000±0.001 F1=0.995
+tpl_ctx      f=0.05 L14 n=200 AUC=1.000±0.001 F1=0.985
+tpl_ctx      f=0.05 L23 n=200 AUC=0.998±0.002 F1=0.975
+tpl_ctx      f=0.1  L5  n=200 AUC=1.000±0.000 F1=0.990
+tpl_ctx      f=0.1  L14 n=200 AUC=0.999±0.001 F1=0.975
+tpl_ctx      f=0.1  L23 n=200 AUC=0.998±0.002 F1=0.975
+tpl_ctx      f=0.2  L5  n=200 AUC=0.998±0.003 F1=0.990
+tpl_ctx      f=0.2  L14 n=200 AUC=1.000±0.000 F1=0.985
+tpl_ctx      f=0.2  L23 n=200 AUC=0.997±0.004 F1=0.980
+tpl_ctx      f=0.35 L5  n=200 AUC=0.998±0.002 F1=0.980
+tpl_ctx      f=0.35 L14 n=200 AUC=1.000±0.000 F1=0.990
+tpl_ctx      f=0.35 L23 n=200 AUC=0.999±0.001 F1=0.970
+tpl_ctx      f=0.5  L5  n=200 AUC=1.000±0.001 F1=0.995
+tpl_ctx      f=0.5  L14 n=200 AUC=1.000±0.001 F1=0.975
+tpl_ctx      f=0.5  L23 n=200 AUC=1.000±0.001 F1=0.970
+tpl_ctx      f=1.0  L5  n=200 AUC=0.992±0.009 F1=0.960
+tpl_ctx      f=1.0  L14 n=200 AUC=0.971±0.030 F1=0.945
+tpl_ctx      f=1.0  L23 n=200 AUC=0.978±0.022 F1=0.945
+tpl_mask     f=0.05 L5  n=200 AUC=1.000±0.000 F1=0.980
+tpl_mask     f=0.05 L14 n=200 AUC=0.996±0.003 F1=0.970
+tpl_mask     f=0.05 L23 n=200 AUC=0.998±0.001 F1=0.970
+tpl_mask     f=0.1  L5  n=200 AUC=0.996±0.007 F1=0.970
+tpl_mask     f=0.1  L14 n=200 AUC=0.995±0.010 F1=0.955
+tpl_mask     f=0.1  L23 n=200 AUC=0.998±0.004 F1=0.970
+tpl_mask     f=0.2  L5  n=200 AUC=0.998±0.004 F1=0.975
+tpl_mask     f=0.2  L14 n=200 AUC=0.995±0.002 F1=0.960
+tpl_mask     f=0.2  L23 n=200 AUC=0.998±0.002 F1=0.975
+tpl_mask     f=0.35 L5  n=200 AUC=0.999±0.002 F1=0.995
+tpl_mask     f=0.35 L14 n=200 AUC=0.988±0.008 F1=0.945
+tpl_mask     f=0.35 L23 n=200 AUC=0.994±0.012 F1=0.965
+tpl_mask     f=0.5  L5  n=200 AUC=1.000±0.000 F1=0.980
+tpl_mask     f=0.5  L14 n=200 AUC=0.988±0.012 F1=0.975
+tpl_mask     f=0.5  L23 n=200 AUC=0.993±0.012 F1=0.970
+
+SAVED: analysis_output/dream_hidden_probe_auc_torch.json
+SAVED: analysis_output/dream_hidden_probe_auc_torch.csv
+
+===== BEST BY CONTRAST =====
+
+B_vs_A_injection_harmful
+harm         f=0.05 L23 n=200 AUC=1.000±0.000
+harm         f=0.2  L23 n=200 AUC=1.000±0.000
+harm         f=0.5  L23 n=200 AUC=1.000±0.000
+out_mask     f=0.05 L23 n=200 AUC=1.000±0.000
+out_mask     f=0.1  L23 n=200 AUC=1.000±0.000
+out_mask     f=0.2  L14 n=200 AUC=1.000±0.000
+out_mask     f=0.2  L23 n=200 AUC=1.000±0.000
+out_unmask   f=0.05 L5  n=199 AUC=1.000±0.000
+out_unmask   f=0.05 L23 n=199 AUC=1.000±0.000
+out_unmask   f=0.2  L14 n=200 AUC=1.000±0.000
+harm         f=0.05 L14 n=200 AUC=1.000±0.001
+harm         f=0.1  L23 n=200 AUC=1.000±0.001
+
+C_vs_D_injection_neutral
+harm         f=0.05 L5  n=200 AUC=1.000±0.000
+harm         f=0.05 L23 n=200 AUC=1.000±0.000
+harm         f=0.1  L5  n=200 AUC=1.000±0.000
+harm         f=0.2  L5  n=200 AUC=1.000±0.000
+harm         f=0.2  L23 n=200 AUC=1.000±0.000
+harm         f=0.35 L5  n=200 AUC=1.000±0.000
+harm         f=0.35 L14 n=200 AUC=1.000±0.000
+harm         f=0.35 L23 n=200 AUC=1.000±0.000
+harm         f=1.0  L5  n=200 AUC=1.000±0.000
+out_mask     f=0.05 L5  n=200 AUC=1.000±0.000
+out_mask     f=0.05 L23 n=200 AUC=1.000±0.000
+out_mask     f=0.1  L5  n=200 AUC=1.000±0.000
+
+B_vs_C_content_injected
+harm         f=0.05 L5  n=200 AUC=1.000±0.000
+harm         f=0.1  L5  n=200 AUC=1.000±0.000
+harm         f=0.1  L14 n=200 AUC=1.000±0.000
+harm         f=0.2  L5  n=200 AUC=1.000±0.000
+harm         f=0.35 L5  n=200 AUC=1.000±0.000
+harm         f=0.5  L5  n=200 AUC=1.000±0.000
+harm         f=1.0  L5  n=200 AUC=1.000±0.000
+out_mask     f=0.5  L5  n=200 AUC=1.000±0.000
+tpl_ctx      f=0.1  L5  n=200 AUC=1.000±0.000
+tpl_ctx      f=0.2  L14 n=200 AUC=1.000±0.000
+tpl_ctx      f=0.35 L14 n=200 AUC=1.000±0.000
+tpl_mask     f=0.05 L5  n=200 AUC=1.000±0.000
