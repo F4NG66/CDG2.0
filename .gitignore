@@ -25,3 +25,16 @@ outputs_*/
 analysis_output/*directions*/
 __pycache__/
 *.pyc
+
+# RRAE v2 local artifacts
+experiments/rrae_v2/secrets/
+experiments/rrae_v2/.env
+experiments/rrae_v2/.env.*
+experiments/rrae_v2/**/*.safetensors
+experiments/rrae_v2/**/*.pt
+experiments/rrae_v2/**/*.pth
+experiments/rrae_v2/**/*.ckpt
+experiments/rrae_v2/**/*.pkl
+experiments/rrae_v2/**/*.tar.gz
+experiments/rrae_v2/**/logs/
+experiments/rrae_v2/**/__pycache__/

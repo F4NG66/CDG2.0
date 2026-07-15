@@ -1,0 +1,60 @@
+# Secrets and local credentials
+secrets/
+.env
+.env.*
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Logs and scheduler outputs
+logs/
+*.log
+*.out
+*.err
+
+# Temporary files
+tmp/
+tmp_*/
+cache/
+.cache/
+
+# Model weights and checkpoints
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.bin
+
+# Large serialized artifacts
+*.pkl
+*.pickle
+*.npz
+*.npy
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Generated experiment artifacts
+hidden_states/
+rrae_runs_v2/
+steering_vectors_v2/
+steering_runs/
+judge_outputs/
+generated_outputs/
+
+# Raw or restricted datasets
+data/raw/
+data/private/
+external/
+external_datasets/
+
+# Local model directories
+models/
+model_weights/
