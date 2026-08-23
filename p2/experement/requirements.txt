@@ -1,0 +1,12 @@
+# LLaDA-8B-Instruct prefill-capture harness — pinned for Alliance (Fir) wheelhouse.
+# Install: module load python/3.11 && virtualenv --no-download $VENV
+#          $VENV/bin/pip install --no-index -r requirements.txt
+# Python 3.11, CUDA via torch+computecanada build.
+torch==2.6.0+computecanada
+numpy==1.26.4+computecanada
+transformers==4.46.3+computecanada
+tokenizers==0.20.0+computecanada
+safetensors==0.4.5+computecanada
+huggingface_hub==0.26.3+computecanada
+accelerate==1.1.1+computecanada
+tqdm==4.67.1+computecanada

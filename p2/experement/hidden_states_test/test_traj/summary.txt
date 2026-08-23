@@ -1,0 +1,19 @@
+  [OK] turn_01.pt
+         hidden : (64, 9, 8, 4096) torch.float16  nan=False  inf=False
+         topk   : (64, 8, 2048) (K=2048)  nan=False
+         layers : [0, 4, 8, 12, 16, 20, 24, 28, 31]
+         prompt_len: 20  actual_len: 8
+         hidden_norm_mean : 178.8406
+         entropy (topK approx): 0.0412 (mean over steps)
+  [OK] turn_02.pt
+         hidden : (64, 9, 9, 4096) torch.float16  nan=False  inf=False
+         topk   : (64, 9, 2048) (K=2048)  nan=False
+         layers : [0, 4, 8, 12, 16, 20, 24, 28, 31]
+         prompt_len: 48  actual_len: 9
+         hidden_norm_mean : 174.5163
+         entropy (topK approx): 0.2118 (mean over steps)
+
+Expected steps per file : 32
+Selected layers         : [0, 4, 8, 12, 16, 20, 24, 28, 31]
+TOPK_LOGITS             : 2048
+Overall: PASS

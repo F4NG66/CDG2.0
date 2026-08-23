@@ -1,0 +1,1 @@
+add a line in the code to choose from to from the seed fang questions also i think just don't extract the hidden states man :)
