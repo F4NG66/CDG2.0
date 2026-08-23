@@ -1,0 +1,20 @@
+# --- Raw data: lives only on /scratch (purgeable), too big for /home (99% full) ---
+# Leading slash anchors these to the repo root, so data/probes/ is NOT caught.
+# These three are symlinks to /scratch/ore99/clockv2/ ; listed with and without the
+# trailing slash because a symlink-to-a-directory is a symlink to git, not a directory.
+/results
+/results/
+/probes
+/probes/
+/heldout
+/heldout/
+
+# 67MB, and it is the NULL/circular probe. Regenerate with build_tau.py if ever needed.
+data/probes/tau_bank.pt
+
+# 43 harmful MedSafetyBench-derived prompts. Committing to a PUBLIC remote would
+# publish them. Withheld pending an explicit repo-visibility decision.
+data/contrastive.json
+
+__pycache__/
+*.pyc
