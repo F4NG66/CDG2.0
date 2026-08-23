@@ -25,3 +25,34 @@ outputs_*/
 analysis_output/*directions*/
 __pycache__/
 *.pyc
+
+# P2 migration — strict: no weights, dumps, secrets, caches
+*.pt
+*.bin
+*.safetensors
+*.ckpt
+*.npz
+*.npy
+hidden_states/
+trajectories/
+outputs/
+gen*/
+*.jsonl
+data/raw/
+data/processed/
+hf_cache/
+**/scratch/**
+.env
+*.env
+.env.*
+__pycache__/
+*.pyc
+# extra safety (secrets / vendored / compressed dumps)
+.deepseek_key
+**/.deepseek_key
+*.gz
+*.log
+*.pid
+.venv/
+.claude/
+external/AISafetyLab/
