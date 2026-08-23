@@ -1,0 +1,31 @@
+[run40] loading GSAI-ML/LLaDA-8B-Instruct bf16 ...
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  17%|█▋        | 1/6 [00:00<00:01,  3.22it/s]Loading checkpoint shards:  50%|█████     | 3/6 [00:00<00:00,  6.70it/s]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:01<00:00,  3.50it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:01<00:00,  5.47it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:01<00:00,  5.01it/s]
+Traceback (most recent call last):
+  File "/home/ore99/experement/region_steer/run40.py", line 111, in <module>
+    main()
+  File "/home/ore99/experement/region_steer/run40.py", line 69, in main
+    model = model.to(args.device).eval()
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch/ore99/cdg_venv/lib/python3.11/site-packages/transformers/modeling_utils.py", line 3157, in to
+    return super().to(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch/ore99/cdg_venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1343, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/scratch/ore99/cdg_venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 903, in _apply
+    module._apply(fn)
+  File "/scratch/ore99/cdg_venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 903, in _apply
+    module._apply(fn)
+  File "/scratch/ore99/cdg_venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 903, in _apply
+    module._apply(fn)
+  File "/scratch/ore99/cdg_venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 930, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/scratch/ore99/cdg_venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1329, in convert
+    return t.to(
+           ^^^^^
+RuntimeError: CUDA error: CUDA-capable device(s) is/are busy or unavailable
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+

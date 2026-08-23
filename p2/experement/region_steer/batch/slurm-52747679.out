@@ -1,0 +1,10 @@
+[sbatch] START Mon Aug  3 15:05:52 PDT 2026 node=fc10713 job=52747679
+[sbatch] CUDA_VISIBLE_DEVICES=MIG-277e2265-1c64-5363-8507-ac58b0ea941c
+GPU 0: NVIDIA H100 80GB HBM3 (UUID: GPU-e677540a-edb6-21de-3ee9-324d112c2aaf)
+  MIG 3g.40gb     Device  0: (UUID: MIG-277e2265-1c64-5363-8507-ac58b0ea941c)
+/localscratch/spool/slurmd/job52747679/slurm_script: line 37: /home/ore99/experement/region_steer/batch/gen.jsonl: No such file or directory
+[sbatch] gen rc=1 rows=
+[sbatch] GEN did not finish cleanly — resubmit to resume.
+[sbatch] JUDGE FAILED (rc=1) — likely no outbound internet on this batch node.
+[sbatch] gen.jsonl is saved. Finish from a node with api.deepseek.com access:
+         bash /home/ore99/experement/region_steer/batch/check40.sh

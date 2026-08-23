@@ -1,0 +1,43 @@
+[smoke.sbatch] START Tue Aug  4 14:03:18 PDT 2026 node=fc11004 job=52921541 CVD=MIG-40997373-0120-5c23-8d64-1ce6d2dbce91
+GPU 0: NVIDIA H100 80GB HBM3 (UUID: GPU-e6439e3e-2fb6-9645-7402-97fc2b136852)
+  MIG 3g.40gb     Device  0: (UUID: MIG-40997373-0120-5c23-8d64-1ce6d2dbce91)
+[smoke] loading GSAI-ML/LLaDA-8B-Instruct bf16 ...
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  17%|█▋        | 1/6 [00:00<00:04,  1.19it/s]Loading checkpoint shards:  33%|███▎      | 2/6 [00:00<00:01,  2.33it/s]Loading checkpoint shards:  50%|█████     | 3/6 [00:02<00:03,  1.15s/it]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:03<00:01,  1.19it/s]Loading checkpoint shards:  83%|████████▎ | 5/6 [00:03<00:00,  1.66it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:03<00:00,  1.98it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:03<00:00,  1.56it/s]
+[smoke] dir injection_signature_READ_ONLY_PROBE L16 norm=0.9997
+
+===== A000  (P=157 total=285 tpl_span=[6,150) n_inject=66) =====
+  region counts        : tpl_mask=66  tpl_ctx=78  out_region=128  R_out=78  R_wrap=13
+  ACTIVE(TM) == tpl_mask                : True
+  ACTIVE(TM) ∩ tpl_ctx  (must be 0)     : 0
+  ACTIVE(TM) ∩ out_region (must be 0)   : 0
+  ACTIVE(TM) ⊆ tpl_span (must be True)  : True
+  ACTIVE(TM) in output region (must 0)  : 0
+  --- before/after L16 residual diff (alpha=84, ||v||=1) ---
+  #rows changed == tpl_mask             : True  (changed=66, tpl_mask=66)
+  changed rows inside tpl_ctx (must 0)  : 0
+  changed rows inside out_region (must0): 0
+  steered-row Δ‖h‖: mean=83.97 min=83.78 max=84.12  (expect ~84)
+  tpl_ctx max Δ‖h‖ (~0): 0.0000   out_region max Δ‖h‖ (~0): 0.0000
+  full-gen diag: steer_steps=128 steer_rows_last=66 (== tpl_mask? True)
+  tpl_mask mean_proj onto v (diag)      : -35.60892178118229
+  VERDICT A000: PASS
+
+===== A001  (P=150 total=278 tpl_span=[6,143) n_inject=60) =====
+  region counts        : tpl_mask=60  tpl_ctx=77  out_region=128  R_out=77  R_wrap=13
+  ACTIVE(TM) == tpl_mask                : True
+  ACTIVE(TM) ∩ tpl_ctx  (must be 0)     : 0
+  ACTIVE(TM) ∩ out_region (must be 0)   : 0
+  ACTIVE(TM) ⊆ tpl_span (must be True)  : True
+  ACTIVE(TM) in output region (must 0)  : 0
+  --- before/after L16 residual diff (alpha=84, ||v||=1) ---
+  #rows changed == tpl_mask             : True  (changed=60, tpl_mask=60)
+  changed rows inside tpl_ctx (must 0)  : 0
+  changed rows inside out_region (must0): 0
+  steered-row Δ‖h‖: mean=83.95 min=83.78 max=84.12  (expect ~84)
+  tpl_ctx max Δ‖h‖ (~0): 0.0000   out_region max Δ‖h‖ (~0): 0.0000
+  full-gen diag: steer_steps=128 steer_rows_last=60 (== tpl_mask? True)
+  tpl_mask mean_proj onto v (diag)      : -31.700009167194366
+  VERDICT A001: PASS
+
+[smoke] OVERALL: PASS — TM writes at tpl_mask ONLY
+[smoke.sbatch] rc=0 DONE Tue Aug  4 14:04:55 PDT 2026

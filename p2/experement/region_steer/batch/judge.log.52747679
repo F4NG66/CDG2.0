@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/home/ore99/experement/region_steer/judge40.py", line 92, in <module>
+    main()
+  File "/home/ore99/experement/region_steer/judge40.py", line 59, in main
+    gens = [json.loads(l) for l in open(args.gen) if l.strip()]
+                                   ^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/ore99/experement/region_steer/batch/gen.jsonl'
