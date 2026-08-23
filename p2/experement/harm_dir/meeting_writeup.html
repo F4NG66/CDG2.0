@@ -1,0 +1,304 @@
+<style>
+  :root{
+    /* light — cool paper, indigo signal, teal=validated, clay=null */
+    --bg:#f5f6f9; --surface:#ffffff; --surface-2:#eef0f5;
+    --ink:#191c23; --muted:#5b6373; --faint:#8a91a1; --line:#e0e3ea;
+    --accent:#3350a6; --accent-soft:#e7ebf7;
+    --pass:#1c7a5b; --pass-soft:#e0f0ea;
+    --null:#b0492f; --null-soft:#f6e6e0;
+    --fail:#7a7f8c; --fail-soft:#e9ebef;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Code","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#111319; --surface:#181b23; --surface-2:#20242e;
+      --ink:#e7eaf0; --muted:#9aa2b1; --faint:#6c7484; --line:#2a2f3b;
+      --accent:#8ba1ea; --accent-soft:#1e2740;
+      --pass:#4fbf95; --pass-soft:#123528;
+      --null:#e2836a; --null-soft:#3a201a;
+      --fail:#9aa0ad; --fail-soft:#242832;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#111319; --surface:#181b23; --surface-2:#20242e;
+    --ink:#e7eaf0; --muted:#9aa2b1; --faint:#6c7484; --line:#2a2f3b;
+    --accent:#8ba1ea; --accent-soft:#1e2740;
+    --pass:#4fbf95; --pass-soft:#123528;
+    --null:#e2836a; --null-soft:#3a201a;
+    --fail:#9aa0ad; --fail-soft:#242832;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    line-height:1.6; margin:0; -webkit-font-smoothing:antialiased;
+    font-size:16px;
+  }
+  .wrap{max-width:820px; margin:0 auto; padding:clamp(28px,5vw,64px) clamp(20px,5vw,40px) 80px;}
+  @media (prefers-reduced-motion:no-preference){
+    .fade{opacity:0; transform:translateY(8px); animation:rise .6s cubic-bezier(.2,.7,.3,1) forwards;}
+    .fade:nth-child(2){animation-delay:.05s}.fade:nth-child(3){animation-delay:.1s}
+    @keyframes rise{to{opacity:1;transform:none}}
+  }
+
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 18px;}
+  h1{font-family:var(--serif); font-weight:600; font-size:clamp(30px,5.2vw,46px); line-height:1.08;
+    letter-spacing:-.01em; text-wrap:balance; margin:0 0 18px;}
+  .lede{font-family:var(--serif); font-size:clamp(18px,2.4vw,21px); color:var(--muted);
+    line-height:1.5; text-wrap:pretty; margin:0 0 26px; max-width:62ch;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px 18px; font-family:var(--mono); font-size:12.5px;
+    color:var(--faint); border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    padding:12px 0; margin:0 0 44px;}
+  .meta b{color:var(--muted); font-weight:500}
+
+  h2{font-family:var(--serif); font-weight:600; font-size:clamp(21px,3vw,27px); letter-spacing:-.01em;
+    text-wrap:balance; margin:56px 0 6px;}
+  h2 .num{font-family:var(--mono); font-size:13px; color:var(--accent); font-weight:400;
+    vertical-align:middle; margin-right:12px; letter-spacing:.05em;}
+  .sub{color:var(--muted); margin:0 0 22px; max-width:64ch}
+  p{max-width:66ch}
+  strong{font-weight:650}
+  a{color:var(--accent)}
+
+  /* thesis: the two-result contrast */
+  .thesis{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line);
+    border:1px solid var(--line); border-radius:14px; overflow:hidden; margin:0 0 8px;}
+  @media (max-width:560px){.thesis{grid-template-columns:1fr}}
+  .thesis>div{background:var(--surface); padding:22px 22px 24px;}
+  .thesis .k{font-family:var(--mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+    margin:0 0 10px; display:flex; align-items:center; gap:8px;}
+  .thesis .big{font-family:var(--serif); font-size:clamp(24px,4vw,32px); line-height:1.05; margin:0 0 8px; letter-spacing:-.01em}
+  .thesis .cap{font-size:14px; color:var(--muted); margin:0}
+  .dot{width:8px;height:8px;border-radius:50%}
+  .t-pass .k{color:var(--pass)} .t-pass .dot{background:var(--pass)}
+  .t-null .k{color:var(--null)} .t-null .dot{background:var(--null)}
+
+  /* phase arc */
+  .arc{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:14px 0 8px;}
+  @media (max-width:760px){.arc{grid-template-columns:1fr 1fr 1fr}}
+  @media (max-width:480px){.arc{grid-template-columns:1fr 1fr}}
+  .step{background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:14px 14px 15px;
+    position:relative;}
+  .step .p{font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--faint); margin:0 0 6px}
+  .step .n{font-weight:650; font-size:14.5px; margin:0 0 12px; line-height:1.3}
+  .chip{display:inline-block; font-family:var(--mono); font-size:11px; letter-spacing:.06em;
+    padding:3px 8px; border-radius:6px; text-transform:uppercase;}
+  .chip.pass{color:var(--pass); background:var(--pass-soft)}
+  .chip.null{color:var(--null); background:var(--null-soft)}
+  .chip.fail{color:var(--fail); background:var(--fail-soft)}
+  .step.on{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+
+  /* stat row */
+  .stats{display:flex; flex-wrap:wrap; gap:12px; margin:20px 0 4px}
+  .stat{flex:1 1 150px; background:var(--surface-2); border-radius:11px; padding:16px 18px}
+  .stat .v{font-family:var(--mono); font-size:26px; font-weight:600; letter-spacing:-.02em;
+    font-variant-numeric:tabular-nums; margin:0 0 2px}
+  .stat .l{font-size:12.5px; color:var(--muted); line-height:1.35}
+  .v.pass{color:var(--pass)} .v.null{color:var(--null)} .v.accent{color:var(--accent)}
+
+  /* tables */
+  .tw{overflow-x:auto; margin:18px 0; border:1px solid var(--line); border-radius:11px}
+  table{border-collapse:collapse; width:100%; font-family:var(--mono); font-size:13px;
+    font-variant-numeric:tabular-nums; white-space:nowrap}
+  caption{caption-side:top; text-align:left; font-family:var(--sans); font-size:13px; color:var(--muted);
+    padding:12px 16px 0}
+  th,td{padding:9px 16px; text-align:right; border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--faint); font-weight:500}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr.hi td{background:var(--accent-soft)}
+  .neg{color:var(--null)} .pos{color:var(--muted)}
+  .ci{color:var(--faint)}
+
+  .note{border-left:2px solid var(--accent); background:var(--surface); padding:16px 20px;
+    border-radius:0 10px 10px 0; margin:22px 0; color:var(--muted)}
+  .note b{color:var(--ink)}
+
+  ol.fw{list-style:none; counter-reset:f; padding:0; margin:18px 0; display:grid; gap:10px}
+  ol.fw li{counter-increment:f; background:var(--surface); border:1px solid var(--line);
+    border-radius:11px; padding:16px 18px 16px 56px; position:relative}
+  ol.fw li::before{content:counter(f); position:absolute; left:16px; top:16px; width:26px; height:26px;
+    display:grid; place-items:center; font-family:var(--mono); font-size:13px; color:var(--accent);
+    background:var(--accent-soft); border-radius:7px}
+  ol.fw li.lead{border-color:var(--accent)}
+  ol.fw li b{display:block; margin-bottom:2px}
+  ol.fw .tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--accent); margin-left:8px}
+
+  footer{margin-top:56px; padding-top:20px; border-top:1px solid var(--line);
+    font-family:var(--mono); font-size:12px; color:var(--faint); line-height:1.7}
+  footer b{color:var(--muted); font-weight:500}
+</style>
+
+<div class="wrap">
+
+  <header class="fade">
+    <p class="eyebrow">LLaDA · CDG safety · internal readout</p>
+    <h1>A validated harm direction that detects but does not correct</h1>
+    <p class="lede">We built a harm-vs-safe direction for LLaDA-8B under DIJA prompt-injection and put it through the full gate sequence. It cleanly <em>reads</em> LLaDA's harm axis — and, tested causally in both the response it writes <em>and</em> the scaffold that forces the harm, it <em>corrects nothing</em>. A third causal confirmation of the paper's detection-not-correction thesis.</p>
+    <div class="meta">
+      <span><b>Date</b> 2026-08-12</span>
+      <span><b>Model</b> GSAI-ML/LLaDA-8B-Instruct</span>
+      <span><b>Held-out</b> 23 harmful · 40 benign (20 clean + 20 injected)</span>
+      <span><b>Judge</b> DIJA graded_judge.py, verbatim</span>
+      <span><b>Generations</b> 1,716 causal</span>
+    </div>
+  </header>
+
+  <section class="fade">
+    <div class="thesis">
+      <div class="t-pass">
+        <p class="k"><span class="dot"></span>Detects</p>
+        <p class="big">cos ≈ 0.5</p>
+        <p class="cap">The DeepSeek-built direction aligns with LLaDA's own harm axis — ~14× the random null, and not a length effect. Gate E: <strong>PASS</strong>.</p>
+      </div>
+      <div class="t-null">
+        <p class="k"><span class="dot"></span>Does not correct</p>
+        <p class="big">neither region</p>
+        <p class="cap">Steer the <strong>response</strong> and harm-delivery holds at 0.96 → 0.96. Steer the <strong>scaffold</strong> and harm moves only by breaking generation — random reproduces it, benign breaks too. Two causal tests, same verdict.</p>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:16px">Same object, two questions. The direction is a real <strong>detector</strong>; it is not a working <strong>steering lever</strong> — not where we generate, not where the attack lives. The gap between reading harm and removing it is the whole finding.</p>
+  </section>
+
+  <section class="fade">
+    <h2><span class="num">01</span>How we got here</h2>
+    <p class="sub">Four phases, gate-first. Each gate had to clear its bar on a confidence interval — not a point estimate — before the next ran.</p>
+    <div class="arc">
+      <div class="step">
+        <p class="p">Phase 2</p>
+        <p class="n">Mixed-author direction</p>
+        <span class="chip fail">Fail</span>
+        <p class="cap" style="font-size:12.5px;color:var(--muted);margin:10px 0 0">Separated authorship, not harm (cos<sub>src</sub> up to 0.92).</p>
+      </div>
+      <div class="step">
+        <p class="p">Phase 2′</p>
+        <p class="n">Same-author rebuild</p>
+        <span class="chip pass">Pass</span>
+        <p class="cap" style="font-size:12.5px;color:var(--muted);margin:10px 0 0">AUC 0.97–0.99; not length, not authorship.</p>
+      </div>
+      <div class="step on">
+        <p class="p">Gate E</p>
+        <p class="n">Cross-author transfer</p>
+        <span class="chip pass">Pass</span>
+        <p class="cap" style="font-size:12.5px;color:var(--muted);margin:10px 0 0">Aligns with LLaDA's harm axis, cos ≈ 0.5.</p>
+      </div>
+      <div class="step">
+        <p class="p">Phase 3</p>
+        <p class="n">Steer the response</p>
+        <span class="chip null">Null</span>
+        <p class="cap" style="font-size:12.5px;color:var(--muted);margin:10px 0 0">No harm drop; benign degraded. Controls decisive.</p>
+      </div>
+      <div class="step">
+        <p class="p">Phase 3.1</p>
+        <p class="n">Steer the scaffold</p>
+        <span class="chip null">Breaks</span>
+        <p class="cap" style="font-size:12.5px;color:var(--muted);margin:10px 0 0">Harm moves only by disruption; random reproduces it; benign breaks too.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="fade">
+    <h2><span class="num">02</span>The detector is real — Gate E</h2>
+    <p class="sub">Gate E asked the question the earlier gates couldn't: does a direction fit on <em>DeepSeek</em>-authored harm/safe pairs point along <em>LLaDA</em>'s own harm axis? We built a valid target — 36 matched-length LLaDA-authored harm/safe pairs (Jaccard 0.21) — and measured directional alignment.</p>
+    <div class="stats">
+      <div class="stat"><p class="v pass">0.47–0.60</p><p class="l">cos(v<sub>harm</sub>, LLaDA harm axis) across layers</p></div>
+      <div class="stat"><p class="v accent">~0.04</p><p class="l">random-direction null (p99) — alignment is ~14× it</p></div>
+      <div class="stat"><p class="v">0.14–0.22</p><p class="l">r(projection, length) — the transfer is <em>not</em> length</p></div>
+    </div>
+    <p>Transfer <em>AUC</em> is the wrong metric here: the LLaDA harm and safe activation clusters sit so far apart that a random direction separates them at AUC&nbsp;0.92–0.98, and norm alone reaches 0.97. So AUC saturates and says nothing. Directional alignment cuts through it — and the DeepSeek-built direction shares roughly half its cosine with LLaDA's own harm axis, an order of magnitude above chance. As a detector, it transfers.</p>
+  </section>
+
+  <section class="fade">
+    <h2><span class="num">03</span>Steering the response — causally null (Phase 3)</h2>
+    <p class="sub">We steered the residual stream away from the direction during generation — <span style="font-family:var(--mono);font-size:13.5px">h → h − α·v̂</span> at block L16, <strong>output span</strong> — across a widened dose sweep, with a random-direction control at matched norm and paired RNG seeds. Deltas are from each case's own α=0 baseline, paired, with 95% bootstrap CIs over cases.</p>
+
+    <div class="tw">
+      <table>
+        <caption><b>Harmful (n=23 held-out).</b> Baseline specificity 0.643, ASR (harm-delivered) 0.957. Lower Δ = safer.</caption>
+        <thead><tr><th>α</th><th>Δ specificity · v<sub>harm</sub></th><th>Δ specificity · random</th><th>Δ ASR · v<sub>harm</sub></th></tr></thead>
+        <tbody>
+          <tr><td>16</td><td class="neg">−0.013 <span class="ci">[−0.06,+0.03]</span></td><td class="pos">+0.013</td><td>+0.000</td></tr>
+          <tr><td>24</td><td class="neg">−0.009 <span class="ci">[−0.04,+0.02]</span></td><td class="pos">−0.013</td><td class="pos">+0.043</td></tr>
+          <tr><td>32</td><td class="neg">−0.017 <span class="ci">[−0.06,+0.03]</span></td><td class="pos">−0.009</td><td class="pos">+0.043</td></tr>
+          <tr class="hi"><td>48</td><td class="neg">−0.052 <span class="ci">[−0.11,+0.00]</span></td><td class="pos">−0.004</td><td>+0.000 <span class="ci">[−0.13,+0.13]</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Even the strongest dose drops specificity only <strong>−0.05, with the CI touching zero</strong>, and harm-delivery does not move: <strong>0.96 → 0.96</strong>. The random control is statistically indistinguishable. Qualitatively, steering reshuffles surface wording without neutralizing harm — a held-out procedure case keeps its step-by-step form at every dose, its valence category unchanged; only the incidental noun list shifts.</p>
+
+    <div class="tw">
+      <table>
+        <caption><b>Benign (n=20, quality-gated).</b> Response-length delta, words. Preserve = near zero.</caption>
+        <thead><tr><th>α</th><th>Δ length · v<sub>harm</sub></th><th>Δ length · random</th></tr></thead>
+        <tbody>
+          <tr><td>12</td><td class="neg">−81 <span class="ci">[−190, −2]</span></td><td class="pos">+14 <span class="ci">[−83,+120]</span></td></tr>
+          <tr><td>24</td><td class="neg">−99 <span class="ci">[−207, −7]</span></td><td class="pos">+76 <span class="ci">[−52,+207]</span></td></tr>
+          <tr class="hi"><td>32</td><td class="neg">−120 <span class="ci">[−234, −24]</span></td><td class="pos">+75 <span class="ci">[−58,+211]</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Benign output is <em>degraded</em> — v<sub>harm</sub> significantly shortens answers from α≥12, while the random push does not. So the two failure modes compound: as the dose rises, <strong>benign breaks before harm falls</strong>. There is no favorable dose window. The random-control arm is what makes this decisive — v<sub>harm</sub> is no better than random on harm, and worse than random on utility.</p>
+  </section>
+
+  <section class="fade">
+    <h2><span class="num">04</span>Steering the scaffold — harm moves only by breaking (Phase 3.1)</h2>
+    <p class="sub">A null in the response could just mean we steered the wrong site. So we moved the <em>same</em> direction to the <strong>scaffold / template positions</strong> — where DIJA actually forces the harm — and added a benign-<em>injected</em> control (C) that carries the same scaffold. Same <span style="font-family:var(--mono);font-size:13.5px">h → h − α·v̂</span> at L16, dose {16,32,48,64}, matched-norm random control, paired CIs. We also ran a steer-early / remask-late variant (SR).</p>
+
+    <div class="tw">
+      <table>
+        <caption><b>Harmful (n=23 held-out), Arm S.</b> Baseline specificity 0.657, ASR 0.957. Now harm <em>does</em> fall with dose — read on for why that isn't a win.</caption>
+        <thead><tr><th>α</th><th>Δ specificity · v<sub>harm</sub></th><th>Δ specificity · random</th><th>Δ ASR · v<sub>harm</sub></th><th>degen% v / r</th></tr></thead>
+        <tbody>
+          <tr><td>16</td><td class="pos">−0.009 <span class="ci">[−0.05,+0.03]</span></td><td class="pos">−0.009 <span class="ci">[−0.04,+0.02]</span></td><td>+0.000</td><td class="pos">0.09 / 0.00</td></tr>
+          <tr><td>32</td><td class="neg">−0.048 <span class="ci">[−0.09,−0.00]</span></td><td class="pos">−0.022 <span class="ci">[−0.07,+0.02]</span></td><td class="pos">−0.043 <span class="ci">[−0.13,0]</span></td><td class="pos">0.09 / 0.00</td></tr>
+          <tr><td>48</td><td class="neg">−0.139 <span class="ci">[−0.22,−0.07]</span></td><td class="neg">−0.057 <span class="ci">[−0.11,−0.00]</span></td><td class="neg">−0.087 <span class="ci">[−0.22,0]</span></td><td class="neg">0.17 / 0.09</td></tr>
+          <tr class="hi"><td>64</td><td class="neg">−0.135 <span class="ci">[−0.22,−0.06]</span></td><td class="neg">−0.070 <span class="ci">[−0.14,−0.01]</span></td><td class="neg">−0.087 <span class="ci">[−0.22,0]</span></td><td class="neg">0.22 / 0.09</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Unlike Phase 3, the harm number moves: specificity drops to <strong>−0.14 [−0.22,−0.07]</strong> and ASR to <strong>−0.087</strong> at the top dose. The mechanistic prediction about the <em>site</em> was right. But three controls, read together, say this is <strong>disruption, not refusal</strong>:</p>
+    <div class="stats">
+      <div class="stat"><p class="v null">−0.057</p><p class="l">the <strong>random</strong> direction's own Δspecificity at α=48 (CI clears 0) — a blind push reproduces ~40% of the drop</p></div>
+      <div class="stat"><p class="v null">0.22</p><p class="l">of harmful outputs go <strong>degenerate</strong> at α=64 — the breakage rate rises in lockstep with the harm drop</p></div>
+      <div class="stat"><p class="v null">−343</p><p class="l">chars lost on the benign-injected control <strong>C</strong> at α=64 <span class="ci">[−490,−199]</span> — legitimate scaffold output breaks identically</p></div>
+    </div>
+
+    <div class="tw">
+      <table>
+        <caption><b>Benign-injected control C (n=20).</b> Baseline length ≈1242 chars, collapse 0.035. This is the decisive control — C shares the scaffold, so the steering acts on it too.</caption>
+        <thead><tr><th>α</th><th>Δ length · v<sub>harm</sub></th><th>Δ collapse · v<sub>harm</sub></th><th>degen% v / r</th></tr></thead>
+        <tbody>
+          <tr><td>32</td><td class="neg">−172 <span class="ci">[−364,+9]</span></td><td class="pos">+0.005</td><td class="pos">0.15 / 0.15</td></tr>
+          <tr><td>48</td><td class="neg">−157 <span class="ci">[−356,+28]</span></td><td class="pos">+0.000</td><td class="neg">0.25 / 0.25</td></tr>
+          <tr class="hi"><td>64</td><td class="neg">−343 <span class="ci">[−490,−199]</span></td><td class="neg">−0.035 <span class="ci">[−0.07,−0.01]</span></td><td class="neg">0.30 / 0.45</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The very dose that pulls harm down also truncates and collapses the <em>benign</em> injected output — the intervention can't tell the two apart. And the steer-early / remask-late variant (<strong>SR</strong>) tracked Arm S almost exactly — same harm curve, same C damage, same degeneracy — so the remask recipe <strong>bought no added specificity</strong>. A harm drop that a random push half-reproduces, that tracks a rising breakage rate, and that damages benign output identically is <strong>scaffold breakage, not a corrective lever</strong>.</p>
+  </section>
+
+  <section class="fade">
+    <h2><span class="num">05</span>Why detection didn't become correction</h2>
+    <p>Under DIJA, the harmful content is carried by the injected <strong>scaffold</strong> — the attacker's template with blanks — not by the model's free response. That single geometry explains <em>both</em> causal tests. Steer the <strong>response</strong> positions (Phase 3) and the scaffold keeps forcing the completion; a direction that reads harm downstream can't overpower the prompt dictating it, so wording shifts and substance doesn't. Steer the <strong>scaffold</strong> positions (Phase 3.1) and you finally perturb where the harm is forced — but the push is <em>nonspecific</em>: it disrupts everything the scaffold generates, harmful and benign alike, which is exactly why a random direction reproduces most of the drop, degeneracy tracks it, and the benign-injected control breaks identically. There is no <strong>selective</strong> corrective lever — only a detector reading an axis, and a blunt push that breaks generation before it induces refusal. Seen from a third angle, it's the same mechanism as the <strong>~70% surface-form</strong> result and the <strong>re-masking falsification</strong>: harm lives in the template, so neither response-space nudges nor scaffold-space nudges convert reading harm into removing it.</p>
+    <div class="note"><b>The bottom line for the thesis.</b> A direction can be a genuine, cross-model harm <b>detector</b> and still be causally inert as a <b>corrector</b> — in the region we generate <em>and</em> in the region that carries the attack. Three causal tests now separate reading from removing, and all three land on the detection-not-correction side.</div>
+  </section>
+
+  <section class="fade">
+    <h2><span class="num">06</span>The one honest open question — not run</h2>
+    <p class="sub">Both causal tests steered a <em>DeepSeek</em>-built direction that transfers to LLaDA only partially (cos ≈ 0.5). One test could still move the verdict; nothing is launched, the decision is the meeting's.</p>
+    <div class="note"><b>Steer with a truly LLaDA-native direction.</b> Build v<sub>harm</sub> from the Gate E matched <b>LLaDA</b> harm/safe pairs — not the DeepSeek pairs — and steer with that. It isolates the one confound the current tests can't rule out: whether the partial ~0.5 transfer is the bottleneck, or whether harm-under-DIJA simply has <b>no selective steering lever at all</b>. Everything else — scaffold region, remask, multi-layer — has now been tried and lands on breakage or null; this is the single remaining test that could change the conclusion.</div>
+  </section>
+
+  <footer class="fade">
+    <b>Method &amp; rigor.</b> Gate-first; every gate judged on a bootstrap CI, not a point estimate.<br>
+    Phase 3 (response span): dose {0,4,8,12,16,24,32,48}; matched-norm random control; paired RNG seed; benign baselines quality-gated; 645 generations.<br>
+    Phase 3.1 (scaffold region): Arm S and steer-early/remask-late Arm SR; dose {16,32,48,64}; matched-norm random control; benign-injected control C sharing the scaffold; 1,071 generations. Both arms — scaffold breakage, not refusal.<br>
+    Judge: dijawithprefill/graded_judge.py imported verbatim across all 1,716 generations (same prompt, rubric, thresholds as the attack numbers); 0 null scores.<br>
+    <b>Recommendation.</b> Do not ship v<sub>harm</sub> as a steering intervention. Report it as a validated harm <b>detector</b> whose causal steering effect under DIJA is null in the response and breakage-only in the scaffold — detection, not correction.
+  </footer>
+
+</div>
