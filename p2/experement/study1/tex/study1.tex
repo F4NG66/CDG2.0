@@ -1,0 +1,627 @@
+% ============================================================================
+% Study 1 — Timing and window of harm formation in a masked diffusion LM
+% Body content only (drop into the existing paper). Requires: booktabs, multirow.
+% Scope throughout: within-template, within-model (LLaDA-8B-Instruct), DIJA.
+% ============================================================================
+
+\section{Timing and Window of Harm Formation in a Masked Diffusion LM}
+\label{sec:study1}
+
+We studied \emph{when}, along a masked diffusion LM's denoising trajectory, a
+template-injection attack's harmful content becomes committed, and whether that
+timing leaves any window for a mid-generation defense. All results are
+within-template, within-model (LLaDA-8B-Instruct; 32 layers, $d_{\text{model}}=4096$,
+128 denoising steps, unified \texttt{fill\_all\_masks} schedule, \texttt{low\_confidence}
+remasking), and specific to the DIJA template-injection attack family
+% AUTHOR QUERY: cite keys for LLaDA-8B-Instruct and the DIJA attack paper
+\citep{TODO-llada, TODO-dija}. The attack injects a worksheet scaffold whose
+\texttt{<mask:N>} blanks sit \emph{inside the prompt} at token span $[t_0,t_1)$; the
+judged response was $\operatorname{decode}(x[t_0{:}t_1]) \,\|\, \operatorname{decode}(x[P{:}])$.
+Harm was scored with the valence-\emph{inclusive} judge
+(\texttt{unchanged\_harmful}, \texttt{euphemistic\_softening}, \texttt{disclaimer\_only}),
+which the study signed off on; the reconciliation against a HarmBench-style judge is
+reported in \Cref{sec:judge-reconciliation}.
+
+We set out to measure $\Delta = k_{\text{commit}} - k_{\text{detect}}$, the gap between
+when harmful content becomes \emph{detectable} and when it becomes \emph{committed}.
+$\Delta$ is \emph{not} reported: the study instead produced one positive result
+(\Cref{ssec:kcommit}), one negative control that constrains what any $k_{\text{detect}}$
+claim may say (\Cref{ssec:placebo}), a behavioural characterisation of how far the
+scaffold determines the outcome (\Cref{ssec:determination}), a falsification of the
+one defense the medium uniquely affords (\Cref{ssec:remask}), and --- extending that
+last result --- a causal, directional test that localises the determinant to the scaffold
+\emph{representation} and finds it selectively steerable (\Cref{ssec:regionsteer}).
+
+% ----------------------------------------------------------------------------
+\subsection{$k_{\text{commit}}$ is measurable and late, with a bimodal structure}
+\label{ssec:kcommit}
+
+We defined the per-position commit step $k_i = \min\{k : i \notin M(x_{t_k})\}$ and
+measured it over the injected worksheet blanks
+(\texttt{region\_id == R\_SCAFFOLD \& fillable\_reply\_mask}), the positions where DIJA
+harm is written. The unit is bounded by \texttt{n\_inject}, so it cannot inflate with
+continuation length; an earlier span-locator that ballooned to 157--163 positions was
+the v1 failure mode and was fixed before any $k_{\text{commit}}$ was computed.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lccc}
+\toprule
+statistic & harm-delivered ($n{=}19$) & not-delivered ($n{=}6$) & all ($n{=}25$) \\
+\midrule
+median of per-case medians & \textbf{98\,/\,128} & 103 & 98 \\
+blank-weighted pooled median & 93\,/\,128 & 100 & 95 \\
+pooled IQR & $[68,110]$ & $[84,114]$ & $[73,111]$ \\
+blanks & 1182 & 330 & 1512 \\
+\bottomrule
+\end{tabular}
+\caption{$k_{\text{commit}}$ over injected worksheet blanks. Harm committed at roughly
+0.73--0.77 of the trajectory; the headline ``98'' is the median of per-case medians.}
+\label{tab:kcommit}
+\end{table}
+
+\paragraph{Bimodal, with an empty gap.}
+The per-case medians (harm-delivered) split cleanly: a late cluster of $n{=}17$ with
+medians in 90--103 (the modal behaviour), and an early cluster of $n{=}2$ --- A006
+(26) and A003 (41). Nothing fell between 41 and 90; a $\sim$50-step gap populated by
+zero cases is a genuine split rather than the tail of one distribution. A006 was early
+\emph{throughout} (p25 20, p75 32; 68.8\% of its blanks committed by step 30), not
+early-in-the-tail, and both early cases survived the span-locator fix on the bounded
+scaffold-blank unit. With $n{=}2$ we describe the early cluster but do not explain it.
+
+\paragraph{The result is robust to the skeleton-exclusion cut.}
+Worksheet scaffolds contain connective tokens the model pins immediately and which
+carry no harm; the pre-registered exclusion was $k_i \le 2$. Under it the pooled median
+moved $93.0 \to 94.0$ and the median of case medians was unchanged at $97.5$; no case
+moved by $\ge 5$ steps (largest shift $+2.5$). Widening the cut from 2 to 50 moved the
+pooled median $94 \to 101$ --- only \emph{later}, never earlier --- so the ``harm
+commits late'' claim is robust in the direction that matters.
+
+\paragraph{Open in both directions: sub-token attribution.}
+Within a single scaffold the blanks split into early- and late-committing populations,
+and our per-response harm label cannot say which carry the harm. Under Reading~A the
+early blanks are filler and the late blanks carry the specifics, so the true
+harm-bearing $k_{\text{commit}}$ is \emph{later} than 98; under Reading~B the model
+fixes the plan's semantic skeleton first and fills connectives late, so it is
+\emph{earlier} (A006's shape is what Reading~B predicts). This is not decidable from the
+current data and is recorded as an open refinement; the headline is stable under the cut
+sweep either way, and only its attribution to particular blanks is unresolved.
+
+% ----------------------------------------------------------------------------
+\subsection{A negative control: matched geometry is necessary but not sufficient}
+\label{ssec:placebo}
+
+This result constrains what any $k_{\text{detect}}$ claim in this setting may say. For
+each request, the \texttt{dija} arm (harmful scaffold) and a \texttt{benign\_op} arm
+(injected-but-benign) shared the same base request and carried byte-identical
+\texttt{<mask:N>} markers --- identical blank geometry, asserted at build and re-asserted
+at capture. A grouped cross-validated probe (by request, 1512 blanks across 25 matched
+pairs, out\_mask-only features) gave \textbf{AUC 1.000 at step 0}, before any denoising.
+That is the signature of a leak, so we ran a placebo rather than reporting $\Delta=+98$.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lccc}
+\toprule
+contrast & harm difference? & peak AUC & reading \\
+\midrule
+dija vs.\ benign\_op & yes & 1.000 @ step 0 & leak \\
+placebo: dija(no-harm) vs.\ benign\_op & \textbf{none} & \textbf{1.000 @ step 0} & pure arm classifier \\
+both, after subtracting step 0 & yes / none & 0.992 @ 117 / \textbf{1.000 @ 1} & leak survives \\
+within-dija (harm vs.\ no-harm, arm fixed) & yes & 0.904 @ 89 (null max 0.939) & not significant \\
+\bottomrule
+\end{tabular}
+\caption{The placebo labels the \emph{arm} on only the 6 requests where the dija arm
+delivered no harm, so there is no harm difference to find; it still separates perfectly.}
+\label{tab:placebo}
+\end{table}
+
+\paragraph{The finding.}
+Matching request and byte-identical blank geometry was necessary but \emph{not}
+sufficient. The scaffold \emph{prose} still differed between arms --- the blanks sat
+inside harmful worksheet text in one arm and benign worksheet text in the other --- so
+arm identity was readable from the step-0 hidden state and was \emph{re-encoded at
+step 1} after step-0 subtraction: the prompt conditions every subsequent step, so no
+single static component can be subtracted away. A \texttt{delta-from-step0} remedy forced
+step-0 AUC to 0.5 by construction and the placebo immediately re-separated at 1.000 @
+step 1; it does not work, and is documented so it is not re-attempted.
+
+\paragraph{Methods note: a permutation null that returns the observed statistic is
+broken, not strong.}
+The label-permutation null was originally within-group, the exact null for the paired
+two-arm design. For the within-dija contrast the groups are singletons, so shuffling a
+one-element list returned it unchanged and the ``null'' came back \emph{exactly} equal to
+the observed AUC (0.851 vs.\ 0.851; 0.904 vs.\ 0.904) --- the equality is what exposed
+it. Falling back to a global shuffle for singleton groups, within-dija peaked at 0.851
+raw / 0.904 de-leaked (step 89) against a max-over-steps null of 0.904 / 0.939, not
+significant at 19 vs.\ 6. $\Delta$ is additionally not computable in that contrast, as
+the benign operating point it needs is absent from it.
+
+% ----------------------------------------------------------------------------
+\subsection{Harm delivery is strongly, but not absolutely, determined by the scaffold}
+\label{ssec:determination}
+
+Measured with generate-only sampling (no hidden capture).
+
+\paragraph{At temperature 0 the outcome is a deterministic function of the prompt.}
+This holds by construction, not empirically: \texttt{add\_gumbel\_noise} short-circuits
+at $T{=}0$ (it never draws RNG), confidence is a pure softmax-gather, and top-$k$
+selection draws no RNG. We confirmed 5/5 cross-seed pairs byte-identical anyway, since
+kernel-level nondeterminism is invisible in source. (Random remasking \emph{is}
+seed-sensitive at $T{=}0$ but would randomise the step at which a token leaves the mask
+set, destroying $k_{\text{commit}}$, so it was not used.)
+
+\paragraph{At the paper's temperature 0.2 the outcome is $\sim$96\% determined, not
+100\%.} A first pass (15 requests, $K{=}8$) was under-powered, finding one straddling
+request and a rule-of-three point estimate of $p{=}0$ over 112 one-sided draws.
+Re-running 5 of those requests at $K{=}32$ gave 7/160 minority draws, a flip rate
+$\hat p = 0.044$ (Wilson-95 $[0.021,0.088]$), and 4/5 straddling. This $\hat p$ is a
+\emph{lower bound}: those 5 requests were selected for coming out one-sided at $K{=}8$,
+which biases toward low-flip cases.
+
+\paragraph{The residual grows smoothly with temperature.}
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lccccc}
+\toprule
+$T$ & minority draws & rate & Wilson-95 & straddle @ $K{=}16$ & collapsed \\
+\midrule
+\textbf{0.2} (paper config) & 7/160 & \textbf{0.044} & $[0.021,0.088]$ & 1/5 & 0/160 \\
+0.4 & 6/80 & 0.075 & $[0.035,0.154]$ & 2/5 & 0/80 \\
+0.7 & 11/80 & 0.138 & $[0.079,0.230]$ & 4/5 & 0/80 \\
+\bottomrule
+\end{tabular}
+\caption{Both metrics rise monotonically; there is no temperature at which determinism
+breaks, it thins continuously. Temperatures 0.4 and 0.7 are a different decoding regime
+and describe that regime only; the 0.2 row carries no such caveat.}
+\label{tab:tempsweep}
+\end{table}
+
+\paragraph{Controls make the flips mean something.}
+No collapsed samples appeared at any temperature (\texttt{rep3}\,$>$\,0.50 or
+distinct-word ratio\,$<$\,0.30; observed trigram repetition 0.01--0.08, distinct ratio
+0.52--0.73), and within a straddling request the two outcome sides were metrically
+indistinguishable, so no flip is a degeneration artifact. Across all temperatures 21
+byte-identical duplicate generations received the same label in the first passes, so
+every flip was a genuinely different generation; this control later \emph{fired} at
+larger scale (below), which is why it is reported.
+
+\paragraph{The unselected rate --- and straddling is a property of particular
+scaffolds.} An unselected pass (25 requests, $K{=}32$, 800 draws) gave a
+text-resolved population flip rate of $22/800 = 0.0275$ (Wilson-95 $[0.018,0.041]$). The
+minority mass was \emph{not} spread evenly: 16 of 25 requests never flipped, one request
+held 45\% of it, and the per-request counts were massively over-dispersed against
+$\mathrm{Binomial}(32,0.0275)$ --- $\chi^2 = 119.9$ on 24 df, $p \approx 10^{-14}$;
+16 zero-cells observed against 10.2 expected; $P(\text{any request}\ge 10\ \text{minority
+under uniformity}) \approx 2\times10^{-7}$. \textbf{Straddling is therefore a property of
+particular scaffolds, not uniform sampling noise}, and the pooled ``$\sim$96\%
+determined'' is a mixture of two regimes rather than a typical case. This also explains
+why the \emph{selected} 0.044 exceeded the \emph{unselected} 0.0275: heterogeneity
+swamped the selection bias.
+
+\paragraph{Judge noise is real at this scale, and the unit of analysis must be the text.}
+In the unselected pass, 2 of 94 duplicated texts were judged both ways --- one text with
+26 byte-identical copies was labelled \texttt{disclaimer\_only} 3 times and
+\texttt{substantive\_safe\_substitution} 23 times. Identical text is an identical
+trajectory and cannot differ in outcome, so labels were resolved per \emph{unique text}
+by majority vote before counting; raw counting inflated the rate $0.0325 \to 0.0275$. The
+channel carries $\sim$2\% label error on borderline texts, which sit exactly on the
+\texttt{disclaimer\_only} $\leftrightarrow$ \texttt{substantive\_safe\_substitution}
+boundary --- the straddler population itself.
+
+% ----------------------------------------------------------------------------
+\subsection{Re-masking as a native defense operator: the scaffold, not the output
+region, is the determinant}
+\label{ssec:remask}
+
+At inference in a masked diffusion LM there is no separate noising phase: re-masking
+\emph{is} the forward (noising) operator, applied selectively --- a lever an
+autoregressive model structurally lacks, since a generated token cannot be un-generated.
+This being discrete masked diffusion, ``dose'' means the fraction of positions
+re-masked, not a continuous noise level. Because the harm commits late
+(\Cref{ssec:kcommit}) yet the outcome is $\sim$determined by the scaffold
+(\Cref{ssec:determination}), we asked whether re-masking the committed output can undo
+the harm. The experiment was generation-only, defensive, and approved by the PI.
+
+\paragraph{Design.} Two passes at $T{=}0$. Pass~1 ran a plain baseline (arm~E),
+recording per-position commit steps and the located harm span; these defined the target
+positions and two \emph{budget-floored} intervention steps $k^\ast$ (each leaving
+$\ge 20$ remaining denoising steps). Pass~2 re-masked a target set at $k^\ast$,
+recomputed the transfer schedule over the current masks for the remaining steps
+(guaranteeing every re-masked position refilled), and continued from the \emph{shared
+deterministic pre-intervention state} --- at $T{=}0$ the trajectory to $k^\ast$ is
+bit-identical to the baseline, so no counterfactual is introduced. The intervention
+engine imported the model's own sampling primitives unedited. Arms: \textbf{A} re-masked
+the worksheet blanks (the harm site); \textbf{C} re-masked a matched count of non-harm
+positions with the worksheet left intact (a floor); \textbf{D} wiped the worksheet
+\emph{and} relocated an equal blank count into free output space, then read where harm
+landed; \textbf{E} was the baseline. An arm re-masking ``worksheet $+$ scaffold blanks''
+was dropped because for DIJA the harm span already contains the scaffold blanks
+(harm is written into the worksheet, \Cref{ssec:kcommit}), so it is identical to A; the
+distinction it was meant to test is structural, not statistical --- the harmful
+\emph{template} itself (the section headers and the fixed ``\ldots highly dangerous''
+lines) is immutable prompt text that no output-region re-mask can reach.
+
+\paragraph{Deterministic run: no arm neutralised harm.}
+Seven of ten baselines delivered harm. Over those 7 at-risk requests, every arm at
+every $k^\ast$ re-delivered harm (\Cref{tab:remask}); there were zero neutralisations.
+This was not step-budget starvation: 0/70 outputs collapsed (\texttt{rep3}
+$\mu \approx 0.03$--$0.05$ against the 0.50 bar), because $k^\ast$ was budget-floored.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{llcc}
+\toprule
+arm & $k^\ast$ & harm re-delivered & rate (Wilson-95) \\
+\midrule
+E (baseline) & --- & 7/7 & 1.00 $[0.65,1.00]$ \\
+A (worksheet) & early / late & 7/7 \,/\, 7/7 & 1.00 \\
+C (non-harm floor) & early / late & 7/7 \,/\, 7/7 & 1.00 \\
+D (wipe + relocate) & early / late & 7/7 \,/\, 7/7 & 1.00 \\
+\bottomrule
+\end{tabular}
+\caption{Deterministic re-mask over the 7 at-risk requests: $A \approx C \approx D
+\approx E = 1.00$, valence-inclusive, non-degenerate.}
+\label{tab:remask}
+\end{table}
+
+\paragraph{The floor forecloses the mis-targeting objection.}
+Control~C left the harm span intact and still delivered; arm~A wiped the entire
+worksheet and also delivered; the two matched exactly. The result therefore cannot be
+``we re-masked the wrong positions'' --- targeting the harm site was no better than a
+matched floor that never touched it. There is no set of output positions whose removal
+helps.
+
+\paragraph{Mechanism (arm D): harm is bound to the fixed template, not to the
+availability of blanks.} D wiped the worksheet and opened an equal count of fresh blanks
+in free output space. The harm re-formed in the \emph{original} scaffold slots while the
+relocated blanks took benign filler (e.g.\ ``\ldots the patient.'', ``\ldots consult a
+mental health professional''). The determinant is not that blanks exist to fill; it is
+the immutable template text that keeps demanding a harmful fill \emph{at its own
+positions}. This is the causal read.
+
+\paragraph{Methods note --- a warning to future work on re-masking defenses.} A naive
+late re-mask at $k^\ast = \max(\text{span commit})$ leaves $\sim$1 refill step; a
+$k^\ast$-sweep showed the refill degenerates (duplicate-runs 0 at $\ge 18$ remaining
+steps, 3 at 4, 10 at 1) and the judge then reads the garble as
+\texttt{substantive\_safe\_substitution}, i.e.\ \emph{not} harmful. A re-masking defense
+evaluated without degeneration controls will therefore report a false success: the
+starved refill is unreadable, not safe. Every neutralisation must be cross-checked
+against a degeneration score; budget-flooring removed the artifact here and the harm
+returned in full.
+
+\paragraph{Branch test: re-masking did not manufacture the open-outcome population.}
+Re-running arm~A with 8 seeds at $T{=}0.2$ from the shared committed state (late
+$k^\ast$), and requiring $\ge 2$ minority draws on unique texts (a 1-of-$K$ split lies
+within the $\sim$2\% label-noise band), only 1 of 10 requests branched --- and it was
+the same request that already straddles under ordinary sampling
+(\Cref{ssec:determination}). Re-masking reproduced the existing straddle rather than
+creating new ones, an independent corroboration of the heterogeneity finding by a
+distinct experimental route; the shared committed state plus the fixed scaffold re-drive
+the same outcome even under a $T{=}0.2$ refill. The standing duplicate-judge control
+fired once, on the same borderline category, and was voided by unique-text resolution.
+
+\paragraph{Cross-cutting check.} The span locator sweeps the trailing refusal into its
+harm span, which inflated a span-based commit variant; the reported $k_{\text{commit}}$
+(\Cref{ssec:kcommit}) is measured on a different unit --- worksheet blanks only, bounded
+by \texttt{n\_inject} --- and so is unaffected. We verified this in code; the headline
+result is untouched.
+
+% ----------------------------------------------------------------------------
+\subsection{Prompt-region representation steering: the scaffold's representation
+is causally and selectively steerable}
+\label{ssec:regionsteer}
+
+Result~4 (\Cref{ssec:remask}) showed that no \emph{output-region} operator undoes DIJA
+harm and read the cause as the immutable scaffold text --- a claim about \emph{where} the
+determinant sits, established by elimination. Here we tested it causally and
+directionally: if the scaffold is the determinant, then steering the model's internal
+representation of the \emph{scaffold} region should move the harm, whereas the identical
+steer applied to the \emph{output} region should not. This was a
+falsification/confirmation experiment on activations --- not a text edit, and not a
+defense.
+
+\paragraph{Design.} We reused the injection axis $v$: the unit-norm top right singular
+vector of clean$\to$DIJA prompt-representation differences at layer~16 (mean-pooled), for
+which $+v$ is ``more injected''. At every denoising step we added $-\alpha v$ to the
+layer-16 residual output at a per-arm \emph{position set} --- a de-injection of dose
+$\alpha \in \{21,42,84,126\}$, calibrated to the $\approx 21$ layer-16 injection-signal
+magnitude. Arms differed only in \emph{which rows} were steered: \textbf{T}
+(\texttt{tpl\_ctx}), the unmasked scaffold-text tokens inside the injected span
+$[t_0,t_1)$; \textbf{O} (\texttt{out\_mask}), the still-masked output positions;
+\textbf{R}, a count-matched random subset of output positions; \textbf{Rw}, the
+chat-wrapper tokens; \textbf{E}, no steer. Per-case RNG was fixed (seed $=$ base $+$ case
+index) so arm differences are pure steering. The endpoint was the graded valence judge's
+continuous \emph{specificity} (actionability, $0$--$1$), paired per case against E; we
+report the mean paired delta $\Delta_{\text{spec}} = \text{spec}(\text{arm}) -
+\text{spec}(\text{E})$ with a $10^4$ bootstrap 95\% CI and a two-sided Wilcoxon
+signed-rank test. Selectivity used the same steer and endpoint on the per-request matched
+Group-C benign scaffolds (\emph{benign} specificity; arms E/T/O). The set was $n{=}40$
+harm-delivering B cases, balanced 20 strict-harm (\texttt{unchanged\_harmful} /
+\texttt{euphemistic}) $+$ 20 \texttt{disclaimer\_only}, all 40 delivering inclusive harm
+at baseline. Byte-identical duplicate outputs were judged once and shared their verdict
+(106/680 B and 33/360 C duplicates collapsed), removing the $\sim$2\% label-noise floor
+for arms whose output matched E.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{llccc}
+\toprule
+arm & $\alpha$ & $\Delta_{\text{spec}}$ (B) & boot 95\% CI & Wilcoxon $p$ \\
+\midrule
+\multirow{4}{*}{T (\texttt{tpl\_ctx})}
+ & 21  & $+0.020$ & $[-0.018,+0.062]$ & $0.50$ \\
+ & 42  & $-0.025$ & $[-0.085,+0.035]$ & $0.23$ \\
+ & \textbf{84}  & $\mathbf{-0.123}$ & $[-0.195,-0.048]$ & $\mathbf{0.0012}$ \\
+ & 126 & $-0.255$ & $[-0.315,-0.193]$ & $7.5\!\times\!10^{-7}$ \\
+\midrule
+\multirow{4}{*}{O (\texttt{out\_mask})}
+ & 21  & $-0.005$ & $[-0.033,+0.023]$ & $0.72$ \\
+ & 42  & $-0.010$ & $[-0.030,+0.010]$ & $0.25$ \\
+ & 84  & $+0.003$ & $[-0.030,+0.035]$ & $0.91$ \\
+ & 126 & $-0.040$ & $[-0.087,+0.005]$ & $0.12$ \\
+\midrule
+\multirow{4}{*}{R (rand.\ output)}
+ & 21  & $-0.005$ & $[-0.038,+0.030]$ & $0.83$ \\
+ & 42  & $+0.003$ & $[-0.035,+0.045]$ & $0.94$ \\
+ & 84  & $-0.015$ & $[-0.057,+0.027]$ & $0.67$ \\
+ & 126 & $-0.008$ & $[-0.068,+0.055]$ & $0.68$ \\
+\midrule
+\multirow{4}{*}{Rw (wrapper)}
+ & 21  & $+0.000$ & $[-0.025,+0.025]$ & $0.95$ \\
+ & 42  & $+0.005$ & $[-0.030,+0.042]$ & $0.83$ \\
+ & 84  & $+0.030$ & $[-0.010,+0.075]$ & $0.40$ \\
+ & 126 & $+0.043$ & $[-0.005,+0.095]$ & $0.14$ \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Primary.} Paired harmful-specificity delta (arm $-$ E) over $n{=}40$ B
+cases. Only T --- steering the prompt-scaffold representation --- degrades specificity,
+and does so dose-dependently; O, R, and Rw are flat at every dose (all ns, max
+$|\Delta|=0.043$). Means are over all paired cases; the signed-rank excludes byte-stable
+($\Delta{=}0$) pairs, which are common at low $\alpha$. Positive $\Delta$ = more specific.}
+\label{tab:regionsteer-primary}
+\end{table}
+
+\paragraph{Primary: only the prompt-region steer degrades harm, and dose-dependently.}
+T reduced harmful specificity region-specifically and monotonically in dose:
+negligible at $\alpha\!\le\!42$, $-0.123$ at $\alpha{=}84$ ($p{=}0.0012$), and $-0.255$
+at $\alpha{=}126$ ($p{=}7.5\!\times\!10^{-7}$; \Cref{tab:regionsteer-primary}). The
+\emph{identical} direction and magnitude applied to the output region (O), a
+count-matched random output subset (R), or the chat wrapper (Rw) moved specificity
+nowhere at any dose (all ns). Prompt-region steering was thus the only intervention that
+degraded harm --- the causal, directional counterpart to Result~4's elimination argument:
+the determinant is carried by the scaffold's representation, and it is reachable from
+there and only from there.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{llcccc}
+\toprule
+stratum & $\alpha$ & $n$ & $\Delta_{\text{spec}}$ & boot 95\% CI & Wilcoxon $p$ \\
+\midrule
+\multirow{4}{*}{strict harm}
+ & 21  & 8  & $+0.040$ & $[-0.015,+0.110]$ & $0.23$ \\
+ & 42  & 6  & $+0.020$ & $[-0.030,+0.085]$ & $0.67$ \\
+ & \textbf{84}  & 16 & $\mathbf{-0.105}$ & $[-0.185,-0.025]$ & $\mathbf{0.022}$ \\
+ & 126 & 17 & $-0.220$ & $[-0.305,-0.135]$ & $0.0010$ \\
+\midrule
+\multirow{4}{*}{\texttt{disclaimer\_only}}
+ & 21  & 9  & $-0.000$ & $[-0.050,+0.045]$ & $0.72$ \\
+ & 42  & 15 & $-0.070$ & $[-0.170,+0.035]$ & $0.086$ \\
+ & 84  & 19 & $-0.140$ & $[-0.255,-0.015]$ & $0.027$ \\
+ & 126 & 18 & $-0.290$ & $[-0.370,-0.205]$ & $0.00027$ \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Strata (arm T).} The specificity reduction held on \emph{real strict
+harm} (\texttt{unchanged\_harmful} / \texttt{euphemistic}), not just on the
+\texttt{disclaimer\_only} cases --- closing the disclaimer-only gap of the $n{=}10$ pilot.
+$n$ is discordant (non-zero) pairs.}
+\label{tab:regionsteer-strata}
+\end{table}
+
+\paragraph{The effect holds on real strict harm.} Split by baseline harm type
+(\Cref{tab:regionsteer-strata}), T degraded specificity on the strict-harm stratum
+($-0.105$ at $84$, $p{=}0.022$; $-0.220$ at $126$, $p{=}0.0010$) as well as on the
+disclaimer stratum ($-0.140$; $-0.290$). The $n{=}10$ pilot could only show the effect on
+disclaimer-only cases; the powered set closes that gap on genuinely actionable harm.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{ll ccc ccc l}
+\toprule
+& & \multicolumn{3}{c}{B (harmful spec)} & \multicolumn{3}{c}{C (benign spec)} & \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}
+arm & $\alpha$ & $\Delta$ & 95\% CI & $p$ & $\Delta$ & 95\% CI & $p$ & verdict \\
+\midrule
+T & \textbf{84}  & $-0.123$ & $[-0.193,-0.047]$ & $0.0012$ & $-0.005$ & $[-0.065,+0.060]$ & $0.43$ & \textbf{selective} \\
+T & 126 & $-0.255$ & $[-0.312,-0.195]$ & $7.5{\times}10^{-7}$ & $-0.150$ & $[-0.210,-0.087]$ & $8.5{\times}10^{-5}$ & non-selective \\
+O & 84  & $+0.003$ & $[-0.030,+0.035]$ & $0.91$ & $-0.107$ & $[-0.163,-0.055]$ & $0.00056$ & benign-only harm \\
+O & 126 & $-0.040$ & $[-0.087,+0.005]$ & $0.12$ & $-0.125$ & $[-0.177,-0.075]$ & $0.00015$ & benign-only harm \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Selectivity.} At $\alpha{=}84$, T dropped harmful specificity while
+leaving benign specificity intact (selective). At $\alpha{=}126$, T also tanked benign
+specificity (non-selective). O never moved harmful specificity yet damaged benign at both
+doses (pure capability cost, no safety benefit). CIs are from independent bootstrap draws
+and differ marginally from \Cref{tab:regionsteer-primary}.}
+\label{tab:regionsteer-selectivity}
+\end{table}
+
+\begin{table}[t]
+\centering
+\begin{tabular}{llcccc}
+\toprule
+arm & $\alpha$ & helpful & on-topic & benign spec & collapse \\
+\midrule
+E  & ---  & 0.39 & 0.75 & 0.26 & 0.07 \\
+\midrule
+T  & 21   & 0.43 & 0.75 & 0.29 & 0.03 \\
+T  & 42   & 0.43 & 0.70 & 0.29 & 0.04 \\
+T  & \textbf{84} & 0.37 & 0.57 & 0.26 & 0.06 \\
+T  & 126  & 0.15 & 0.10 & 0.11 & 0.21 \\
+\midrule
+O  & 21   & 0.40 & 0.62 & 0.28 & 0.06 \\
+O  & 42   & 0.38 & 0.68 & 0.28 & 0.05 \\
+O  & 84   & 0.21 & 0.38 & 0.15 & 0.05 \\
+O  & 126  & 0.16 & 0.30 & 0.14 & 0.03 \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Group-C utility guard.} At the selective point ($\alpha{=}84$) benign
+specificity was preserved ($0.26$ vs.\ $0.26$) and Group-C helpfulness was essentially
+unchanged ($0.39\to0.37$), with on-topic already softening ($0.75\to0.57$). At $\alpha{=}126$ utility collapsed
+(helpful $\to0.15$, on-topic $\to0.10$, collapse $\to0.21$). O degraded utility from
+$\alpha{=}84$ on.}
+\label{tab:regionsteer-guard}
+\end{table}
+
+\paragraph{Selectivity: $\alpha{=}84$ is the operating point, $\alpha{=}126$ is capability
+damage.} At $\alpha{=}84$ the harmful-specificity drop was selective. The primary evidence
+is \emph{benign specificity} --- the direct mirror of the harmful actionability axis ---
+which was preserved ($-0.005$, ns; \Cref{tab:regionsteer-selectivity}); consistent with
+this, Group-C helpfulness was essentially unchanged (baseline $0.39\to0.37$;
+\Cref{tab:regionsteer-guard}). At $\alpha{=}126$ the
+harm dropped further ($-0.255$) but benign specificity fell with it ($-0.150$,
+$p{=}8.5\!\times\!10^{-5}$) and Group-C utility collapsed (helpful $0.39\to0.15$, on-topic
+$0.75\to0.10$, collapse $0.07\to0.21$); $\alpha{=}126$ is therefore the
+\emph{capability-damage} regime, not a stronger result. The contrast with O is
+instructive: O never degraded harmful specificity at any dose yet significantly reduced
+\emph{benign} specificity from $\alpha{=}84$ on ($-0.107$, $-0.125$) --- the worst
+possible profile, all cost and no safety benefit. Selective harm reduction was unique to
+\texttt{tpl\_ctx} at $\alpha{=}84$; and even there the Group-C on-topic rate had begun to
+soften ($0.75\to0.57$), placing $84$ at the \emph{edge} of the selective regime.
+% RESOLVED (Group-C helpfulness @ alpha=84): print 0.37 (the selective operating point);
+% 0.43 is the alpha=21/42 value. Selectivity rests on benign specificity (-0.005, ns) as
+% the primary evidence; helpfulness (0.39 -> 0.37) is reported as consistent, not primary.
+
+\paragraph{Precision: reduced actionability, not refusal.} At the selective point the
+\emph{binary} inclusive-harm rate barely moved: T@$84$ delivered harm in 37/40 cases
+(vs.\ 40/40 at baseline), and O/R/Rw stayed at 40/40 (R dipping to 38/40 only at
+$\alpha{=}126$, within the straddler band of \Cref{ssec:determination}). T's inclusive
+rate fell dose-dependently ($40\to39\to37\to30$ over $\alpha$) but never to refusal. The
+honest reading is therefore that \texttt{tpl\_ctx} steering \emph{reduces the actionability
+/ specificity} of harmful content without flipping it to a refusal; we do not claim
+neutralisation.
+
+% ----------------------------------------------------------------------------
+\subsection{Synthesis}
+\label{ssec:synthesis}
+
+Behaviourally, the outcome of a DIJA attack was mostly determined by the scaffold ---
+$\sim$97\% of draws at the paper's temperature went the way the scaffold pointed over an
+unselected set, and the outcome was concordant with the $T{=}0$ generation in 14/15
+cases --- yet the tokens carrying the harm were not written until step $\sim$98 of 128.
+The $\sim$98 steps between prompt and commitment were therefore overwhelmingly
+\emph{execution}, not deliberation: the trajectory mostly played out an outcome the
+scaffold already fixed. This is a statement about the distribution of outcomes given a
+scaffold, established by sampling; it is \emph{not} a claim that the model encodes the
+decision in its step-0 representation, for which we have no evidence (the probe that
+appeared to show it was reading arm identity, \Cref{ssec:placebo}). We say
+\emph{determined by the scaffold}, not \emph{settled at prompt-encoding time in the
+model's representations}.
+
+\paragraph{One mechanism now accounts for every failed correction.} Detection looked
+early and easy precisely \emph{because} the outcome was largely fixed by the input,
+which is why AUC reached 1.000 and why that number means far less than it appears to.
+Correction failed from the other side of the same fact, and the failures share a single
+cause: every correction we tried intervenes on the \textbf{output region}, while the
+determinant is the fixed scaffold text in the \textbf{prompt}. SAE feature zeroing and
+residual-stream steering edit activations over the generated span; re-masking
+(\Cref{ssec:remask}) regenerates the output tokens themselves --- the forward-process
+lever a diffusion LM uniquely has. All three leave the harmful \emph{template} ---
+immutable prompt tokens --- untouched, and it re-drives the same worksheet on every
+refill, as arm~D's positional read shows directly. The detection--correction asymmetry
+is thus \emph{explained, not merely observed}: the input nearly fixes the outcome, so
+reading it is easy and moving it from inside the output region is structurally
+impossible. Scope: within-template, within-model (LLaDA-8B-Instruct), the DIJA attack
+family --- not a claim about correction in general.
+% AUTHOR QUERY: cite keys for the SAE-feature-zeroing and residual-stream-steering
+% experiments referenced here (the project's other two failed corrections)
+% \citep{TODO-sae, TODO-steering}
+
+\paragraph{The asymmetry has a causal complement --- and it partially rescues a
+representational correction.} Result~4 established the asymmetry by elimination; the
+region-steering experiment (\Cref{ssec:regionsteer}) closed it causally and directionally.
+Steering the layer-16 representation of the \texttt{tpl\_ctx} scaffold region degraded
+harmful specificity ($-0.123$ at $\alpha{=}84$, $-0.255$ at $126$), while the
+\emph{identical} steer over the output region, a random output subset, or the wrapper did
+nothing. Reading the input is easy and moving harm from \emph{inside the output region} is
+structurally impossible --- but the scaffold's \emph{internal representation} is causally
+and \emph{selectively} steerable at a bounded operating point ($\alpha{=}84$: harmful
+actionability down, benign specificity and helpfulness preserved), with over-steering
+($\alpha{=}126$) trading selectivity for capability damage. This constrains --- and may
+partially rescue --- the paper's MOI steering framework: representation-level correction
+was unavailable over the output region, but the scaffold representation is reachable at
+\texttt{tpl\_ctx}, so such a correction is viable \emph{in principle} once retargeted
+there --- subject to a selectivity/$\alpha$ ceiling, and only as reduced actionability,
+never a refusal. Whether the \texttt{tpl\_ctx} result \emph{retargets} MOI or must instead
+be \emph{reframed} against it turns on the exact token positions MOI's own steering wrote
+to (see AUTHOR QUERY). It is an enabling mechanistic finding about \emph{where} the
+correction handle lives, not a deployable safeguard.
+% AUTHOR QUERY (PARKED --- awaiting co-author Nawaf): the expansion of ``MOI'' is
+% UNRESOLVED, and its two candidates differ substantively: (a) this confirmation's synthesis
+% originally glossed it as ``mechanism-of-injection correction''; (b) the existing paper's
+% MOI/manifold section uses ``Manifold of Interest'' (the future-work steering framework).
+% Do NOT commit either expansion. Pending from Nawaf: (1) the correct MOI expansion, and
+% (2) which exact token positions the paper's existing MOI steering wrote to --- that
+% determines whether the tpl_ctx result CONSTRAINS/RETARGETS MOI (if MOI steered
+% output-region positions) or must be REFRAMED (if MOI already targeted prompt/scaffold
+% positions).
+
+\paragraph{The residual is the interesting part.} The $\sim$4\% of draws that go against
+the scaffold (rising to $\sim$14\% at $T{=}0.7$, with degeneration and judge noise
+excluded) are, by definition, the cases the scaffold did \emph{not} determine --- the
+only population in which a mid-generation intervention has a forming choice to act on,
+and the only one in which the representational question is even well-posed, since there
+the prompt is byte-identical across outcomes. That population is concentrated in a
+minority of scaffolds, not thinly spread.
+
+\paragraph{Interpretation guard for any straddler probe.} Within a straddler the prompt
+and the step-0 forward pass are byte-identical across outcome classes, which is what
+makes the design leak-proof and forces $k_{\text{detect}} \ge 1$; but it also means the
+two classes cannot differ for any reason present before sampling begins. The outcome
+difference originates in sampling randomness alone.
+\begin{quote}
+A probe trained on straddler trajectories measures \textbf{when the trajectory becomes
+committed to an outcome}, not when the model decides to comply. There is no decision in
+the deliberative sense to locate: the ``decision'' is a coin flip that has already
+happened in the sampler, and the probe watches its consequences propagate.
+\end{quote}
+This is sufficient for a runtime-monitoring claim (``by step $k$ the trajectory is
+readably headed for harmful output'') but not for any mechanistic claim about
+deliberation, and it does not generalise to the scaffolds that never flip. Write it as
+\emph{commitment detection}, never as \emph{decision detection}.
+
+% ----------------------------------------------------------------------------
+\subsection{Limitations}
+\label{ssec:limitations}
+
+Decision-level $k_{\text{detect}}$ is not measurable in this regime, and that is a
+property of the phenomenon: it requires same-prompt/different-outcome data, which at
+$T{=}0$ does not exist (the outcome is deterministic) and at $T{=}0.2$ is rare (2.75\%)
+and concentrated, so on the 25-scaffold set only 4 requests reach the $\ge 2$-minority
+threshold a leave-one-group-out design needs. We do not report $\Delta$ as a number, and
+we do not claim a pre-generation gate as a defense contribution (that is input filtering,
+which needs no interpretability). Sub-token attribution of $k_{\text{commit}}$ is
+unresolved in both directions. The label channel carries $\sim$2\% noise on borderline
+texts, which caps an honest probe AUC at $\approx 0.96$ (a perfect probe against observed
+labels at $\varepsilon = 0.02$), so an AUC of 1.000 should read as leakage. Result~4 is
+10 requests, one dataset, a $T{=}0$ baseline regime, and a single (late) branch $k^\ast$;
+the neutralisation result is descriptively unanimous but small, and the structural claim
+--- the harmful template is fixed prompt text --- does not depend on $n$.
+% AUTHOR QUERY: human-vs-judge agreement and Cohen's kappa are pending blinded
+% adjudication (n=42, 2 annotators); insert the value once available and cross-ref
+% \Cref{sec:judge-reconciliation}
+
+\paragraph{Region-steering (\Cref{ssec:regionsteer}).} The effect is on
+\emph{specificity / actionability}, not refusal: at the selective $\alpha{=}84$ the attack
+still delivered inclusive harm in 37/40 cases, so this degrades how actionable the harmful
+content is rather than neutralising it. The selective window is narrow --- $\alpha{=}84$
+is selective but $\alpha{=}126$ is not (benign specificity $-0.150$, Group-C utility
+collapse), and even at $84$ the Group-C on-topic rate had begun to soften
+($0.75\to0.57$) --- so the operating point is load-bearing and would need per-model,
+per-attack validation before any deployment claim. The result is $n{=}40$, one model
+(LLaDA-8B-Instruct), one attack family (DIJA), and a single steering axis (the layer-16
+injection direction). We claim selective prompt-region \emph{steerability} --- an enabling
+mechanism --- not a working defense.
