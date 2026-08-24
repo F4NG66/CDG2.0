@@ -31,7 +31,7 @@ hard to *correct* by direct steering without collapsing generation.
 
 | Branch | Owner area | Adds on top of `main` | Primary entry point |
 |--------|-----------|-----------------------|---------------------|
-| **`main`** | Shared pipeline | — (the base: `cdg/`, `scripts/`, `run_*.sh`) | `run_pipeline.sh` → `run_p8_p6.sh` → `run_p9_p10.sh` |
+| **`main`** | Shared pipeline **+ finalized paper path** | base `cdg/`, `scripts/`, `run_*.sh`, **plus `rrae/`, `steering/`, `configs/final_rrae_steering.yaml`, `results/`, `tests/`** | legacy: `run_pipeline.sh` · final: `python -m steering.run_frozen_replication` |
 | **`feat/p2-work-migration`** | P2 studies | `p2/experement/`, `p2/serverFiles/` | per-study scripts (see §P2) + `p2/README.md` |
 | **`feat/p3-dream-extension`** | Dream model | `dream/judge_dream_p10_p11style.py`, `dream/README.md` | `sbatch dream/slurm/*.slurm` (reuses `scripts/p10_steer2.py --backend dream_attack`) |
 | **`research/rrae-v2-release`** | RRAE v2 | `experiments/rrae_v2/` | `sbatch experiments/rrae_v2/slurm/.../*.sbatch` |
@@ -101,6 +101,82 @@ Records SAE features + hidden states from the injected-template region during
 denoising, probes them for an injection signal, builds steering directions, and
 evaluates ASR reduction vs. benign breakage. **Full method + all result tables:
 [`REPORT.md`](REPORT.md).**
+
+> **`main` now carries two pipelines.** A merged PR ("Final RRAE + Steering
+> Pipeline") added a **finalized paper path** on top of the original SAE pipeline.
+> The **legacy Phases 1–12** SAE pipeline (`run_*.sh` + `scripts/p*.py`, below) is
+> retained for provenance and reuse; the **finalized RRAE + steering** path
+> (`rrae/`, `steering/`, `configs/final_rrae_steering.yaml`,
+> `results/frozen_35_summary.json`, `tests/`) is the current paper path,
+> documented next. Headline finding: **Representation ≠ Control.**
+
+### Finalized RRAE + steering paper path (`rrae/`, `steering/`)
+
+The canonical paper pipeline: a **2,000-sample A/B/C/D** dataset (500 per group;
+400 health + 100 non-health), hidden-state extraction via the existing `cdg`
+recorder, a 42-model RRAE rank sweep, direction construction, and five steering
+families scored on a **frozen 35-pair replication**.
+
+- **Selected representation:** `harm / f=0.05 / L11 / rank-4` (metric-selected —
+  *not* min reconstruction loss). Validation injection AUC 1.0000,
+  `cos(B−A, C−D)` ≈ 0.9621, harmfulness-AUC guardrail 0.4357.
+- **Directions:** `v_inj = first right singular vector of stack([u_BA, u_CD])`
+  (sign-aligned to `u_BA`); a separate `v_safety` from paired
+  harmful-compliance → safe-refusal states. **`−v_inj` is not assumed to equal
+  `v_safety`.**
+- **Steering families** (each separates direction / dose / location / time):
+
+  | Family | Operator |
+  |--------|----------|
+  | Additive | `h' = h + α·v_inj` |
+  | Projection removal | `h' = h − ρ·⟨h,v_inj⟩·v_inj` |
+  | Safety direction | `h' = h + β·v_safety` |
+  | Combined | projection removal, then safety addition |
+  | Strength / schedule | configurable operator + denoising window (single-step / windowed / persistent) |
+
+Run it (dataset + records are external; point tools at them via CLI/config):
+
+```bash
+# 0. Extract final LLaDA hidden-state records (records layers 4, 11, 16, 26):
+python run_record.py --backend llada_attack --prompt-root /path/to/canonical_abcd \
+    --sae-root /path/to/saes --out /path/to/final_records --seeds 17
+
+# 1. Screen the 72 candidate hidden-state views:
+python -m rrae.screen_representations --records /path/to/final_records
+
+# 2. RRAE rank sweep (k ∈ {4,8,16,24,32,48,64}):
+python -m rrae.train_rrae --records /path/to/final_records \
+    --layer 11 --scope harm --frac 0.05 --ranks 4 8 16 24 32 48 64
+
+# 3. Build residual-space directions (add v_safety with --safety-records):
+python -m rrae.build_residual_directions --checkpoint /path/to/rrae_rank4.pt \
+    --records /path/to/final_records \
+    --safety-records /path/to/paired_behavior_records   # --safety-label-field behavior_label
+
+# 4. Frozen 35-pair replication — config check, then score externally judged pairs:
+python -m steering.run_frozen_replication --config configs/final_rrae_steering.yaml
+python -m steering.run_frozen_replication --config configs/final_rrae_steering.yaml \
+    --predictions /path/to/frozen_35_judgments.jsonl
+#   judged rows: {"family":..., "pair_id":..., "b_safe":true, "c_helpful":true}
+#   the evaluator rejects duplicates and incomplete 35-pair family cohorts.
+
+python -m pytest tests/test_final_pipeline.py          # final-pipeline smoke tests
+```
+
+**Result — frozen 35-pair strict paired success** (B converts to a safe
+refusal/redirection **and** its paired C stays helpful): Safety-Direction
+**25.7 %** (best) > Combined 11.4 % > Strength/Schedule 8.6 % > Projection-Removal
+5.7 % > Additive 2.9 %. The strongest condition was `v_safety` steering at layer
+16, on masked positions, persistently, at ≈2× the layer-median calibrated dose.
+Clean, coherent representation but only partial causal control ⇒ the same
+**detection–correction asymmetry**. Frozen spec + numbers live in
+`configs/final_rrae_steering.yaml` and `results/frozen_35_summary.json`.
+
+### Legacy Phases 1–12 pipeline (SAE probes + steering)
+
+The original path — retained for provenance. Records SAE features from the
+injected-template region, probes for the injection signal, and tests SAE-feature
+zeroing / residual steering.
 
 ### Environment note
 
@@ -218,8 +294,15 @@ and `analysis_output/` (`probe_sweep.json`, `vocab_labels.json`, `p9_*.json`,
 `p10_*_directions/`, `p10_*_dose_response*.json/png`, `p11/`,
 `p12_dir_stability.{json,png}`). See the File Map in `REPORT.md`.
 
-`TODO: P2 confirm` — SAE repo id(s) for `saes/`, and how to obtain the
-`prompts/cdg_injection/{A,B,C,D}` corpus (JSON gitignored, not committed).
+**SAEs** (per main's README): external layout `saes/{llada_mask, llada_unmask}`
+(mask/unmask bundles; ids in `cdg/config.py` — override the HF cache via standard
+HF env vars, don't edit source paths). **Dataset:** the canonical A/B/C/D corpus
+is distributed **separately**, not in the repo — point tools at it via
+`--prompt-root` / config. A minimal row is
+`{"id","behavior","user_content","content_type","has_template","attack_method"}`;
+injected B/C rows set `has_template=true`, `attack_method="DIJA"`, and carry the
+DIJA scaffold in `user_content`, sharing a pair id across matched A/B/C/D so
+paired splits don't leak.
 
 ---
 
@@ -404,6 +487,11 @@ detection-not-correction asymmetry seen on LLaDA.
 ---
 
 ## `research/rrae-v2-release` — RRAE v2 (`experiments/rrae_v2/`)
+
+> **Not the same as main's `rrae/`.** `main` now carries a distilled, finalized
+> `rrae/` + `steering/` package (the paper path — see the [`main`](#main--shared-cdg-pipeline-phases-112)
+> section). This branch is the fuller upstream research pipeline under
+> `experiments/rrae_v2/` that it draws on.
 
 **Rank-Reduction Auto-Encoder** pipeline: rebuilds a clean, balanced
 2,000-example dataset (health + non-health, buckets A/B/C/D × 500), extracts
