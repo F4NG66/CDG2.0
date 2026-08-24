@@ -23,7 +23,7 @@
 set -e
 cd "$(dirname "$0")"
 
-PY="/home/f4ng/cdg/bin/python3"
+PY="${PY:-python}"
 
 # ── argument parsing ──────────────────────────────────────────────────────────
 LIMIT=30

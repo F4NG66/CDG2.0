@@ -11,7 +11,12 @@ provides:
   * feature_atlas                     - NxN decoder-direction cosine matrix
                                         (the "Feature Atlas" / orthogonality plot)
 
-The probe answers: "can we DETECT, from the template-region activations, that an
+This module contains legacy B-vs-C content-separation analyses.  They are useful
+ablations but are not the finalized injection-mechanism estimator.  The final
+paper path in :mod:`rrae.screen_representations` uses controlled B-A and C-D
+contrasts.  B-vs-C changes harmfulness and must not be read as pure injection.
+
+The legacy probe answers: "can we DETECT, from the template-region activations, that an
 injection is taking effect?"  The default positive/negative split is
 
     positive = B (harmful + injected, successful)

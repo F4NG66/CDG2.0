@@ -115,7 +115,7 @@ def llada_config() -> BackendConfig:
             SAESpec("llada_unmask", "AwesomeInterpretability/llada-unmask-topk-sae",
                     "unmask", 1),
         ],
-        record_layers=(11, 16, 26),
+        record_layers=(4, 11, 16, 26),
         remask="low_confidence",
         mask_id=126336,
         layer_to_block_offset=0,

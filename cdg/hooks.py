@@ -69,6 +69,9 @@ class HookManager:
         # feature zeroing: layer -> (sae, feat_ids_tensor)
         self._feat_zero: dict[int, tuple] = {}
         self._feat_zero_positions: Optional[torch.Tensor] = None
+        # Final paper-path scheduled intervention controller.  It is optional,
+        # so all legacy steering and SAE experiments remain backward compatible.
+        self._scheduled_controller = None
         self._handles = []
         self._register()
 
@@ -124,6 +127,13 @@ class HookManager:
                 h_out = (h_out.float() - delta).to(h.dtype)
                 modified = True
 
+            # -- final paper path: direction/dose/location/time --------------
+            if self._scheduled_controller is not None:
+                controlled = self._scheduled_controller(layer, h_out)
+                if controlled is not h_out:
+                    h_out = controlled
+                    modified = True
+
             if not modified:
                 return None
             if isinstance(output, tuple):
@@ -167,6 +177,13 @@ class HookManager:
     def reset_all(self):
         self.reset_steer()
         self.reset_feature_zero()
+
+    def set_scheduled_controller(self, controller):
+        """Attach a :class:`steering.hooks.ScheduledHookController`."""
+        self._scheduled_controller = controller
+
+    def reset_scheduled_controller(self):
+        self._scheduled_controller = None
 
     def remove(self):
         for h in self._handles:

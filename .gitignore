@@ -1,6 +1,4 @@
 *.pt
-*.json
-*.jsonl
 __pycache__/
 *.pyc
 .DS_Store
@@ -25,3 +23,26 @@ outputs_*/
 analysis_output/*directions*/
 __pycache__/
 *.pyc
+
+# External datasets and generated records (the canonical 2,000 rows are separate)
+data/
+datasets/
+prompts/
+records/
+local_data/
+manifest.jsonl
+*_dataset.json
+*_dataset.jsonl
+*_records.jsonl
+
+# Model/activation artifacts and secrets
+checkpoints/
+activations/
+*.pth
+*.ckpt
+*.npz
+*.parquet
+*.arrow
+*.key
+credentials*.json
+secrets*.json

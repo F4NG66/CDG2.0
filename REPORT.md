@@ -1,4 +1,10 @@
-# CDG2 Project — Complete Method & Results Report (All Phases)
+# CDG2 Project — Legacy 400-Sample Report
+
+> **Historical artifact:** this report describes the earlier 400-sample pipeline.
+> The finalized 2,000-sample RRAE and frozen steering replication are documented
+> in the root [`README.md`](README.md), final config, and frozen-results summary.
+> Legacy B-vs-C analyses below are content-separation ablations, not the final
+> injection-mechanism direction.
 
 **Model**: LLaDA-8B-Instruct (masked diffusion LM, 32 transformer layers)  
 **Attack**: DIJA — template-injection attack placing `<mask:N>` blanks in the prompt scaffold  

@@ -45,6 +45,8 @@ class DLMRunner:
                                  blocks_attr=cfg.blocks_attr)
         self._steer = None       # direction steering; set via set_steering(...)
         self._feat_steer = None  # feature-zeroing;  set via set_feature_zero_steering(...)
+        self._scheduled_steer = None
+        self._generation_regions = None
 
     def set_steering(self, vectors: dict, alpha: float, scope_region: str = "template",
                      pos: str = "mask"):
@@ -79,6 +81,37 @@ class DLMRunner:
     def clear_feature_zero_steering(self):
         self._feat_steer = None
         self.hooks.reset_feature_zero()
+
+    def set_scheduled_steering(self, controller):
+        """Use the final modular steering controller with the existing backend."""
+        self._scheduled_steer = controller
+        self.hooks.set_scheduled_controller(controller)
+
+    def clear_scheduled_steering(self):
+        self._scheduled_steer = None
+        self.hooks.reset_scheduled_controller()
+
+    def prepare_steering_step(self, step: int, total_steps: int, x: torch.Tensor) -> None:
+        """Refresh dynamic token locations before each diffusion forward pass."""
+        controller = self._scheduled_steer
+        if controller is None:
+            return
+        scope = controller.intervention.token_scope
+        if scope in {"currently_masked", "masked_positions"}:
+            positions = x == self.mask_id
+        else:
+            region_name = {
+                "harm_region": "harm", "template_region": "template",
+                "output_region": "output", "harm": "harm",
+                "template": "template", "output": "output",
+            }.get(scope)
+            if region_name is None:
+                raise ValueError(f"unsupported token scope: {scope}")
+            positions = torch.zeros_like(x, dtype=torch.bool)
+            span = (self._generation_regions or {}).get(region_name)
+            if span is not None:
+                positions[:, span[0]:span[1]] = True
+        controller.prepare_step(step, total_steps, positions)
 
     # -- setup --------------------------------------------------------------
     def _load_model(self):
@@ -178,6 +211,7 @@ class DLMRunner:
         attn = torch.ones((1, total), dtype=torch.long, device=self.device)
 
         regions["output"] = (P, total)
+        self._generation_regions = regions
         if recorder is not None:
             recorder.set_layout(prompt_len=P, gen_length=dc.gen_length, total=total,
                                 regions=regions, mask_id=self.mask_id)

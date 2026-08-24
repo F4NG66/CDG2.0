@@ -1,4 +1,5 @@
 import re
+import os
 import torch
 
 from transformers import AutoTokenizer, AutoModel
@@ -8,7 +9,7 @@ from cdg.config import get_backend_config
 
 torch.manual_seed(0)
 
-model_path = "/scratch/nmmd294/diffusion_model/diffusion_models/Dream-v0-Instruct-7B"
+model_path = os.environ.get("DREAM_MODEL_PATH", "Dream-org/Dream-v0-Instruct-7B")
 
 print("===== loading Dream =====")
 tok = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)

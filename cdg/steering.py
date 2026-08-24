@@ -1,5 +1,12 @@
 from __future__ import annotations
-"""Build residual-space steering vectors from recorded activations.
+"""Legacy steering-vector builders retained for historical experiments.
+
+The finalized paper path is implemented in :mod:`rrae` and :mod:`steering`.
+In particular, B-vs-C is content-confounded and MUST NOT be interpreted as the
+primary injection mechanism.  Final ``v_inj`` uses the shared agreement between
+the controlled B-A and C-D contrasts.
+
+Build residual-space steering vectors from recorded activations.
 
 The injection direction is identified by a *difference-in-differences* logic:
 
