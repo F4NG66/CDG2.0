@@ -10,13 +10,14 @@
 
 set -euo pipefail
 
-cd /home/nmmd294/scratch/fang
-
-source /home/nmmd294/hive_lab/diffusion_model/venv_llada/bin/activate
+: "${PROJECT_ROOT:?Set PROJECT_ROOT to the CDG2.0 checkout}"
+: "${VENV_ACTIVATE:?Set VENV_ACTIVATE to the environment activation script}"
+cd "$PROJECT_ROOT"
+source "$VENV_ACTIVATE"
 
 unset PYTHONPATH
 export PYTHONNOUSERSITE=1
-export PYTHONPATH=/home/nmmd294/scratch/fang/runtime_stubs:/home/nmmd294/scratch/fang
+export PYTHONPATH="${RUNTIME_STUBS:-$PROJECT_ROOT/runtime_stubs}:$PROJECT_ROOT"
 
 echo "===== JOB INFO ====="
 hostname

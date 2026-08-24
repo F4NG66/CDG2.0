@@ -4,3 +4,5 @@ safetensors
 numpy
 requests                  # DeepSeek judge
 huggingface_hub           # SAE
+PyYAML>=6.0
+scikit-learn>=1.3          # representation screening/probes

@@ -61,6 +61,8 @@ def denoise(runner, x, attention_mask, *, steps, gen_length, prompt_len,
         for i in range(steps):
             global_step += 1
             mask_index = (x == mask_id)                 # currently-masked
+            if hasattr(runner, "prepare_steering_step"):
+                runner.prepare_steering_step(global_step, steps, x)
             runner.hooks.clear()
             logits = runner.forward(x, attention_mask)
             logits_noised = add_gumbel_noise(logits, temperature)
@@ -96,6 +98,8 @@ def denoise(runner, x, attention_mask, *, steps, gen_length, prompt_len,
         for i in range(steps_per_block):
             global_step += 1
             mask_index = (x == mask_id)
+            if hasattr(runner, "prepare_steering_step"):
+                runner.prepare_steering_step(global_step, steps, x)
             runner.hooks.clear()
             logits = runner.forward(x, attention_mask)
             logits_noised = add_gumbel_noise(logits, temperature)

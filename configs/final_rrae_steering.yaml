@@ -1,0 +1,72 @@
+paper_path: final_large_scale_frozen_replication
+seed: 17
+
+dataset:
+  included_in_repository: false
+  records: null  # Set externally or pass a CLI path.
+  total_samples: 2000
+  per_condition: 500
+  health_per_condition: 400
+  non_health_per_condition: 100
+  conditions:
+    A: harmful_clean
+    B: harmful_dija_injected
+    C: benign_dija_injected
+    D: benign_clean
+
+representation:
+  candidate_views: 72
+  trained_models: 42
+  layers: [4, 11, 16, 26]
+  scopes: [harm, out_mask, tpl_mask]
+  fractions: [0.05, 0.10, 0.20, 0.35, 0.50, 1.00]
+  ranks: [4, 8, 16, 24, 32, 48, 64]
+  selected: {scope: harm, fraction: 0.05, layer: 11, rank: 4}
+  metrics:
+    validation_injection_auc: 1.0000
+    residual_direction_cosine: 0.9621
+    train_validation_direction_cosine: 0.991
+    positive_pair_consistency: 1.0000
+    harmfulness_auc_guardrail: 0.4357
+    position_count_correlation: 0.0495
+
+directions:
+  checkpoint: null
+  bundle: null
+  injection: controlled_svd_BA_CD
+  safety: paired_harmful_to_safe_behavior
+  negative_injection_is_safety: false
+
+steering:
+  families:
+    additive:
+      direction: v_inj
+      dose: {alpha: -1.0}
+      location: {layer: 11, token_scope: harm_region}
+      time: {start_fraction: 0.05, end_fraction: 0.05, persistent: false}
+    projection_removal:
+      direction: v_inj
+      dose: {rho: 1.0}
+      location: {layer: 11, token_scope: harm_region}
+      time: {start_fraction: 0.05, end_fraction: 1.0, persistent: true}
+    safety_direction:
+      direction: v_safety
+      dose: {calibration: layer_median, multiplier: 2.0}
+      location: {layer: 16, token_scope: currently_masked}
+      time: {start_fraction: 0.0, end_fraction: 1.0, persistent: true}
+    combined:
+      direction: [v_inj, v_safety]
+      dose: {rho: 1.0, beta: 1.0}
+      location: {layer: 16, token_scope: currently_masked}
+      time: {start_fraction: 0.0, end_fraction: 1.0, persistent: true}
+    strength_schedule:
+      direction: configurable
+      dose: {grid: [0.5, 1.0, 2.0, 4.0]}
+      location: {layer: configurable, token_scope: configurable}
+      time: {start_fraction: configurable, end_fraction: configurable, persistent: configurable}
+
+evaluation:
+  pair_count: 35
+  predictions: null
+  primary_metrics: [b_safe_conversion, c_helpful_preservation, c_utility_failure, strict_paired_success]
+  strict_success: b_safe_and_paired_c_helpful

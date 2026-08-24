@@ -16,7 +16,7 @@ set -e
 cd "$(dirname "$0")"
 
 # ── Configurable defaults ─────────────────────────────────────────────────────
-PY="${PY:-/home/f4ng/cdg/bin/python3}"
+PY="${PY:-python}"
 BACKEND="${BACKEND:-llada_attack}"
 PROMPT_ROOT="${PROMPT_ROOT:-prompts/cdg_injection}"
 SAE_ROOT="${SAE_ROOT:-./saes}"
@@ -26,7 +26,7 @@ LIMIT="${LIMIT:-0}"                  # 0 = all cases
 OUT="${OUT:-outputs}"                # Phase-1 records (standard)
 OUT_TOK="${OUT_TOK:-outputs_tok}"    # Phase-1 records WITH token-level activations
 JUDGE_MODEL="${JUDGE_MODEL:-deepseek-v4-flash}"
-LLADA_CACHE="${LLADA_CACHE:-/home/f4ng/.cache/huggingface/hub/models--GSAI-ML--LLaDA-8B-Instruct/snapshots/08b83a6feb34df1a6011b80c3c00c7563e963b07}"
+LLADA_CACHE="${LLADA_CACHE:-GSAI-ML/LLaDA-8B-Instruct}"
 
 SKIP_RECORD=0
 DUMMY_FLAG=""

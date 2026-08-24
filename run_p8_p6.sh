@@ -4,8 +4,8 @@
 set -e
 cd "$(dirname "$0")"
 
-PY="/home/f4ng/cdg/bin/python3"
-LLADA_CACHE="/home/f4ng/.cache/huggingface/hub/models--GSAI-ML--LLaDA-8B-Instruct/snapshots/08b83a6feb34df1a6011b80c3c00c7563e963b07"
+PY="${PY:-python}"
+LLADA_CACHE="${LLADA_CACHE:-GSAI-ML/LLaDA-8B-Instruct}"
 OUT="outputs"
 
 echo "━━━  p8: Logit-lens vocab labels for ALL active features  ━━━"
