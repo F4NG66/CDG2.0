@@ -195,6 +195,55 @@ above** — read the study's own doc for its run command:
 
 `TODO: P2 confirm` a canonical entry order for the sub-studies if one is needed.
 
+#### Environment for the sub-studies
+
+The sub-study scripts **hardcode an interpreter path** and are split across two
+venvs — neither is created by the Setup section above. Override `PY=` in the
+script, or recreate an equivalent env:
+
+| Interpreter (as hardcoded) | Python | Used by | Key pins |
+|---|---|---|---|
+| `/scratch/ore99/cdg_venv/bin/python` | 3.11.5 | `harm_dir/scripts/`, `region_steer/` | numpy 1.26.4, torch 2.6.0, transformers 4.46.3 |
+| `/home/ore99/env_llada/bin/python` | 3.10.13 | `study1/`, `clockv2/`, `serverFiles/dijawithprefill/` | numpy 1.26.4, scipy 1.15.1, scikit-learn 1.5.2, torch 2.6.0, transformers 4.38.2 |
+
+Note the Python split: the "Python 3.11" requirement at the top of this README
+holds for `cdg_venv`, but the `study1` / `clockv2` scripts were run on 3.10.13.
+`scipy` and `scikit-learn` are installed only in `env_llada`.
+
+Environment variables the sub-study wrappers export (counts = files setting them):
+
+```bash
+export HF_HOME=/scratch/ore99/hf_cache      # 11 scripts — HF cache on /scratch
+export HF_HUB_OFFLINE=1                     # 15 — compute nodes have no network
+export TRANSFORMERS_OFFLINE=1               #  4
+export HF_DATASETS_OFFLINE=1                #  4
+export PYTHONUNBUFFERED=1                   #  9
+export TOKENIZERS_PARALLELISM=false         #  4
+```
+
+Generation jobs run **key-free** (several `unset DEEPSEEK_API_KEY` explicitly);
+judging is a separate login-node pass, since compute nodes cannot reach
+`api.deepseek.com`.
+
+#### Data the sub-studies expect (gitignored — not in the repo)
+
+None of these are tracked. Recreate them by running the study, or copy them
+across:
+
+| Path | Produced / used by |
+|---|---|
+| `clockv2/data/probes/v_injection_svd.pt` | steering direction — **input** to `region_steer/` |
+| `dija_attack/refined_100.json` | Qwen-refined DIJA scaffolds (B cases) |
+| `clockv2/data/benign_op_matched.json` | matched benign scaffolds (C cases) |
+| `region_steer/batch*/gen.jsonl`, `judged.jsonl` | region-steering generations + judgments |
+| `harm_dir/data/*.pt`, `*.jsonl` | captured states, pairs, steering pilots |
+| `/scratch/ore99/study1_straddle/{samples,judged}.jsonl` | study1 straddle / temp-sweep / yield |
+| `/scratch/ore99/study1_remask_v2/{samples,judged}.jsonl` | study1 re-masking (arms A/C/D/E) |
+
+SLURM headers across `p2/**/*.sbatch` use `--account=def-zshakeri_gpu` and
+`--gres=gpu:nvidia_h100_80gb_hbm3_3g.40gb:1` (H100 MIG slice), with walltimes
+from 00:25:00 to 08:00:00.
+
 ---
 
 ## Outputs
