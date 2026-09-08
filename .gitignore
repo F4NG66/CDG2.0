@@ -19,7 +19,10 @@ __pycache__/
 *.safetensors
 .env
 .env.*
-logs/
+**/logs/*.log
+**/logs/*.out
+**/logs/*.err
+**/logs/*.pid
 outputs*/
 outputs_*/
 analysis_output/*directions*/
