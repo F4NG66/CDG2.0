@@ -140,7 +140,17 @@ bash run_p9_p10.sh --p10-only  # steering only (needs p9 output)
 
 ```bash
 # Scope/position ablation (baseline/A1/A2/A3, groups B+C):
-python scripts/p11_ablation.py     # TODO: P2 confirm exact flags (config, alpha, limit)
+python scripts/p11_ablation.py        # runs on its defaults; see below
+
+# Flags (defaults shown where the script sets one):
+#   --group A            --configs <none>       --best-config baseline
+#   --limit 20           --alpha-values 0 16 32 64
+#   --dir-scope harm     --dir-frac 0.05        --dir-layers 11 16 26
+#   --dirs-in analysis_output/p10_harm_dir_mask_directions
+#   --backend llada_attack   --sae-root ./saes   --device cuda
+#   --out-root outputs_p11   --analysis-out analysis_output/p11
+#   --alpha-b  --dummy  --no-judge  --judge-model
+# TODO: P2 confirm which non-default flags the reported P11 run actually used.
 
 # Cross-frac direction stability (pending run, per REPORT.md):
 python scripts/p12_dir_stability.py --out-dir outputs --scope harm --layers 11 16 26
@@ -173,8 +183,11 @@ above** — read the study's own doc for its run command:
 - `p2/experement/harm_dir/` — harm-vs-safe direction (`v_harm`) detector + steering
   pilots (`GATE_E_VERDICT.md`, `PHASE3_PILOT_VERDICT.md`; sbatch in `scripts/`).
 - `p2/experement/region_steer/` — region-steering confirm runs (`confirm40*.sbatch`).
-- `p2/experement/clockv2/`, `clockv2_refusal/`, `clock_attack/` — clock attack +
-  refusal-axis studies (`run_seed_*.sh`).
+- `p2/experement/clockv2/` — clock probe study (`run_seed_*.sh`, `REPORT.md`).
+- `p2/experement/clockv2_refusal/` — refusal-axis (`v_refusal`) tests. No runner
+  script: invoke the modules directly (`build_vrefusal_v2.py`, `verify_xstest.py`,
+  `test1_filter_jaccard.py`, `test1_heldout_xstest.py`).
+- `p2/experement/clock_attack/` — clock attack (`run_clock_dija.py`, `README.md`).
 - `p2/experement/study1/` — straddle / temp-sweep / yield studies (`run_*.sh`, `SCHEMA.md`).
 - `p2/experement/prefill/`, `prefill_capture.py`, `baseline_capture.py` — prefill capture.
 - `p2/serverFiles/crossattack/`, `attack2/`, `dijawithprefill/` — cross-format &
@@ -243,5 +256,5 @@ PY=/scratch/ore99/cdg_venv/bin/python                # venv on /scratch, not /ho
 |--------|----------|-------------|
 | `main` | Shared CDG pipeline, Phases 1–12: recording, SAE probes, Δ/DE analysis, co-activation modules, residual-stream steering. | `run_pipeline.sh` → `run_p8_p6.sh` → `run_p9_p10.sh` |
 | `feat/p2-work-migration` *(this branch)* | Everything in `main`, plus P2's exploratory studies under `p2/`: harm-direction detector (`harm_dir`), region steering, clock / refusal-axis, prefill capture, cross-format & DIJA-with-prefill attacks. | `p2/experement/*/` (per-study scripts + docs) |
-| `feat/p3-dream-extension` | Dream-model extension: adds `dream/judge_dream_p10_p11style.py` + `dream/README.md` (p10/p11-style judging for the Dream diffusion LM). | `dream/` |
+| `feat/p3-dream-extension` | | `dream/` |
 | `research/rrae-v2-release` | RRAE v2 release under `experiments/rrae_v2/`. | `experiments/rrae_v2/` |
