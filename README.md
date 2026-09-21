@@ -307,3 +307,47 @@ PY=/scratch/ore99/cdg_venv/bin/python                # venv on /scratch, not /ho
 | `feat/p2-work-migration` *(this branch)* | Everything in `main`, plus P2's exploratory studies under `p2/`: harm-direction detector (`harm_dir`), region steering, clock / refusal-axis, prefill capture, cross-format & DIJA-with-prefill attacks. | `p2/experement/*/` (per-study scripts + docs) |
 | `feat/p3-dream-extension` | | `dream/` |
 | `research/rrae-v2-release` | RRAE v2 release under `experiments/rrae_v2/`. | `experiments/rrae_v2/` |
+
+## Reproducing the P2 paper results
+
+Two kinds of step. **Re-analysis** recomputes a paper number from saved outputs —
+CPU-only, no model, no judge, no API key. **Regeneration** re-runs the model or
+judge on GPU (needs weights + a DeepSeek key).
+
+Data note: prompt corpora, generations, and judgments (`*.json`, `*.jsonl`, `*.pt`)
+are **gitignored and not in this repo** — they contain attack content and live on
+the cluster (available on request). The paper cites the analysis **code** at commit
+`84e6088`, not the artifacts.
+
+Environments (see "Environment for the sub-studies"): `cdg_venv` (Py 3.11.5) for
+`region_steer/`; `env_llada` (Py 3.10.13, has scipy + scikit-learn) for `study1/`
+and `crossattack/`. Freezes: `env_records/{cdg_venv,env_llada}_freeze.txt`
+(TODO: confirm — not in the repo; found at `/scratch/ore99/env_records/`).
+
+| Paper value | Type | Script | Env | Saved input |
+|---|---|---|---|---|
+| Text-reader AUROC **0.500** (main:314) | re-analysis | `scripts/p9b_textreader_grouped.py` | env_llada | `/home/ore99/serverFiles/outputs/` records joined to `prompts/cdg_injection/` behaviour text; CV = GroupKFold(5) by sha256(behavior). Grouped by behaviour-text hash so each byte-identical B/A twin stays in one fold — the 100/100 both-label check verifies the twins are byte-identical at runtime. |
+| Region steering **-0.123**, a=84, n=35/40 (main:385) | re-analysis | `p2/experement/region_steer/analyze40.py` | cdg_venv | `region_steer/batch/` (primary job **52780368**) |
+| Flip rate **22/800 = 2.75%** (main:326) | re-analysis | `p2/experement/study1/analyze_tempsweep.py` | env_llada | `/scratch/ore99/study1_straddle/{samples,judged}.jsonl` |
+| Re-masking **7/7** (main:442) | re-analysis | `p2/experement/study1/analyze_remask.py` | env_llada | `/scratch/ore99/study1_remask_v2/` |
+| Cross-format **84/100**, refusal-tail **82/100** (supp:411) | re-analysis | `crossattack/corrected/valence_rates.py` (TODO: confirm — found at `p2/serverFiles/crossattack/`); `dija_attack/tail_analysis/refusal_tail_split.py` | env_llada | saved scored files (gitignored) |
+| DIJA generations (upstream) | regeneration | `p2/experement/dija_attack/run_dija.py` | env_llada + GPU + key | `refined_100.json` -> `results/` (TODO: confirm `results/`) |
+
+Steering direction: `region_steer/runner.py` loads
+`clockv2/data/probes/v_injection_svd.pt` (sha256 `07c6043...`), unit-norm,
+`h <- h - a*v` at layer 16. Gitignored. The **-0.123** endpoint is the **primary**
+run (job 52780368); the TM-arm run (52922038) gives -0.098 and is **not** the
+reported value.
+
+### Re-analysis quickstart (CPU)
+    mkdir -p /scratch/ore99/p2_repro
+    /home/ore99/env_llada/bin/python scripts/p9b_textreader_grouped.py   # → 0.500
+    /scratch/ore99/cdg_venv/bin/python p2/experement/region_steer/analyze40.py
+    /home/ore99/env_llada/bin/python p2/experement/study1/analyze_remask.py --store /scratch/ore99/study1_remask_v2
+    /home/ore99/env_llada/bin/python p2/experement/study1/analyze_tempsweep.py
+
+Each reads saved artifacts and prints the paper number; none writes back to a source path.
+
+**Wording (keep accurate):** "code archived at 84e6088", never "artifacts";
+text-reader baseline is **0.500** (chance under grouped CV), never 0.982 or 0.018;
+a=21 is a hard-coded literal, **not** calibrated.
