@@ -5,4 +5,5 @@ numpy
 requests                  # DeepSeek judge
 huggingface_hub           # SAE
 PyYAML>=6.0
-scikit-learn>=1.3          # representation screening/probes
+scikit-learn>=1.3          # representation screening/probes; M3' gate
+scipy                      # M3 power simulation

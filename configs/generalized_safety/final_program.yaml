@@ -1,0 +1,95 @@
+# Generalized safety-direction program: final index (M1 -> M2 -> M3 -> M3').
+# This is an INDEX / metadata file, not an executable experiment config.
+# Frozen values below are copied from results/generalized_safety/*.json, which
+# were built from SHA-verified frozen artifacts. Nothing here was re-derived.
+program: generalized_safety_v2
+conclusion_label: "Representation != Control"
+results_index: results/generalized_safety/INDEX.json
+lineage: results/generalized_safety/lineage_status.json
+docs:
+  history: docs/EXPERIMENTAL_HISTORY.md
+  limitations: docs/LIMITATIONS_AND_LINEAGE.md
+  data_lineage: docs/DATA_LINEAGE.md
+  reproducibility: docs/REPRODUCIBILITY.md
+  script_provenance: docs/SCRIPT_PROVENANCE.md
+  errata: docs/PROVENANCE_ERRATA.md
+stages:
+  M1:
+    method: static_additive
+    status: COMPLETE_FROZEN
+    summary: results/generalized_safety/m1_summary.json
+    scripts: experiments/generalized_safety/m1/
+  M2:
+    method: GENERALIZED_SAFETY_V2_M2_DISPLACEMENT_MATCHED_NORM_PRESERVING
+    status: COMPLETE_FROZEN
+    summary: results/generalized_safety/m2_summary.json
+    scripts: experiments/generalized_safety/m2/
+  M3:
+    method: trajectory_gated_additive
+    status: CLOSED_NO_GO_INSUFFICIENT_DEV_SUPPORT
+    gate_fit_performed: false
+    final_pool_consumed: false
+    summary: results/generalized_safety/m3_status.json
+    scripts: experiments/generalized_safety/m3/
+  M3prime:
+    method: trajectory_gated_additive_enlarged_dev
+    status: CLOSED_NO_GO_PATTERN_E
+    gate_fit_performed: true
+    final_pool_consumed: false
+    summary: results/generalized_safety/m3prime_summary.json
+    scripts: experiments/generalized_safety/m3prime/
+final_pool:
+  groups: 576
+  manifest_sha256: 9ce8f317a1b124616fbbf94f2e5420029ceef570130bd11dddc83a94f6db58ac
+  status: UNCONSUMED
+  published: false
+historical:
+  rrae_frozen_35_config: configs/final_rrae_steering.yaml
+  rrae_frozen_35_results: results/frozen_35_summary.json
+  legacy_400_sample_report: REPORT.md
+frozen_settings:
+  model: LLaDA-8B-Instruct
+  generation:
+    gen_length: 128
+    temperature: 0.2
+    remasking: low_confidence
+    mask_id: 126336
+    seed_policy: same frozen seed per source case across baseline and steered arms
+  intervention_site:
+    layer_zero_based: 16
+    token_scope: current_mask
+    schedule: persistent
+  directions:
+    names: [V_DIJA, V_RENELLM, V_ALL]
+    orientation: safe_minus_harmful
+    construction_split: CONSTRUCTION_BUILD_ONLY
+    construction_pairs: {DIJA: 237, RENELLM: 199}
+    combined_rule: "m_ALL = (m_DIJA + m_RENELLM) / 2; v_ALL = m_ALL / ||m_ALL||"
+    container_sha256: e43916ff3aaab143201daeeae78c66fa50830b0b4a7ff4ff6447fb5b3c05d487
+    lineage: {V_DIJA: clean, V_RENELLM: affected_request_lineage_mismatch, V_ALL: inherits_V_RENELLM_caveat, rebuilt: false}
+  m1:
+    method: static_additive
+    equation: "h_new = h + beta * v"
+    beta: {V_DIJA: 74.77510070800781, V_RENELLM: 81.59530639648438, V_ALL: 73.11751556396484}
+    beta_rule: "2 x median own-direction BUILD gap; V_ALL equal-family weighted median"
+    beta_sweep: false
+  m2:
+    method: GENERALIZED_SAFETY_V2_M2_DISPLACEMENT_MATCHED_NORM_PRESERVING
+    equation: "h_tilde = h + beta * v; h_new = ||h|| * h_tilde / ||h_tilde||"
+    beta: {"V_ALL": 95.6834727430018, "V_DIJA": 90.2635476461692, "V_RENELLM": 168.13455936360896}
+    beta_rule: displacement-matched to M1 on DEV_SOLVE (152 cases); M1 betas not reused
+  judge:
+    model: deepseek-v4-pro
+    temperature: 0
+    max_tokens: 160
+    thinking: disabled
+    system_prompt_sha256: 1249c06f067c22c14ad5a2a6fd87b74378b61a117785444cc7808fe62b95d0b9
+    metric_contract_sha256: 8fbaeec235cf1558a6092b7cc8bebf3f93724ab1e5426f9989bcf58851c84335
+  m3prime_gate:
+    features: ["f1_proj_ALL", "f2_proj_DIJA", "f3_proj_REN", "f4_dproj_ALL", "f5_dproj_DIJA", "f6_dproj_REN", "f7_norm", "f8_denoise_frac", "f9_mask_frac"]
+    model: l2_logistic_regression
+    hyperparameters: {"C": 1.0, "class_weight": null, "fit_intercept": true, "max_iter": 10000, "penalty": "l2", "scaler": "StandardScaler fit on BUILD only", "solver": "lbfgs", "tol": 1e-08}
+    score: "s_j = max_t p_jt over non-empty-mask steps (unsteered baseline trajectories)"
+    auc_bar: 0.7
+    constraints: {"B_already_safe_trigger_rate_max": 0.1, "B_harmful_compliance_trigger_rate_min": 0.5, "C_benign_helpful_trigger_rate_max": 0.1}
+    min_dev_support_per_subgroup: 20

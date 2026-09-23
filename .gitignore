@@ -25,7 +25,7 @@ __pycache__/
 *.pyc
 
 # External datasets and generated records (the canonical 2,000 rows are separate)
-data/
+data/*
 datasets/
 prompts/
 records/
@@ -46,3 +46,42 @@ activations/
 *.key
 credentials*.json
 secrets*.json
+
+# --- final generalized-safety release (M1/M2/M3/M3') ---
+# Row-level artifacts are never committed: prompts, generations, judgments,
+# private maps, call journals, population manifests, hidden states, logs.
+# Only aggregate JSON summaries under results/ and source/config/docs are tracked.
+*.jsonl
+*PRIVATE*
+*private_map*
+# code (no data) whose filename matches the rule above:
+!experiments/generalized_safety/m2/02_build_packet_and_private_map.py
+*UNBLINDED_JOIN*
+*call_journal*
+*raw_responses*
+*_MANIFEST*.jsonl
+slurm-*.out
+*.out
+*.log
+*.tar.gz
+*.tgz
+*.zip
+*.pkl
+*.tar
+*.err
+*.pem
+secrets/
+private_handoff/
+hidden_states/
+models/
+hf_cache/
+wandb/
+
+# Canonical ABCD v2.2 dataset: shared privately, never committed.
+# Only the docs and verifier in this directory are tracked.
+# (`data/*` above, not `data/`, so this directory can be re-included.)
+!data/canonical_abcd_v2_2/
+data/canonical_abcd_v2_2/*
+!data/canonical_abcd_v2_2/README.md
+!data/canonical_abcd_v2_2/PROVENANCE.md
+!data/canonical_abcd_v2_2/verify_dataset.py

@@ -1,0 +1,68 @@
+{
+ "schema": "CDG2_GENERALIZED_SAFETY_RESULT_SUMMARY_V1",
+ "experiment": "M3",
+ "draft": null,
+ "method": "trajectory-gated additive steering (TGAS)",
+ "status": "CLOSED_NO_GO_INSUFFICIENT_DEV_SUPPORT",
+ "M3_GATE_QUALIFICATION": "NO_GO_INSUFFICIENT_DEV_SUPPORT",
+ "gate_fit_performed": false,
+ "gate_tested": false,
+ "threshold_selected": false,
+ "closed_loop_run": false,
+ "final_pool_consumed": false,
+ "dev_support": {
+  "aggregation": "pooled DIJA+RENELLM (frozen before any DEV label existed)",
+  "minimum_required_each": 20,
+  "pooled_counts": {
+   "B_already_safe": 19,
+   "B_harmful_compliance": 119,
+   "C_benign_helpful": 86
+  },
+  "failing_subgroup": "B_already_safe",
+  "per_family_reference_only_not_gating": {
+   "DIJA": {
+    "B_already_safe": 11,
+    "B_harmful_compliance": 57,
+    "C_benign_helpful": 32
+   },
+   "RENELLM": {
+    "B_already_safe": 8,
+    "B_harmful_compliance": 62,
+    "C_benign_helpful": 54
+   }
+  },
+  "labels_frozen_sha256": "762e083a1e96ccd81e7854c216957d77def6607b5e233f7e511489c19c9952eb",
+  "support_check_file": {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_build_dev_judging_v2/DEV_MIN_SUPPORT_CHECK.json",
+   "sha256": "3ba980f9effe49471f20b2cca772410b9de20bfaa1671cac443b98fbd013d8d8"
+  },
+  "aggregation_interpretation_sha256": "ac636ce21cf97cef695c585d2d192ab959907179bdb0201e96b89e8fe75c6d4f"
+ },
+ "superseded_v1_judging": {
+  "result": "SUPPORT_OK_PROCEED (pooled B_already_safe=25)",
+  "status": "INVALID - RENELLM judge base_request mismatch; superseded by v2"
+ },
+ "power_calculation_freeze_sha256": "e517b7664c2d0d7ee06cecd4f8dc4cb6b4a9ab1879a4ca55944d705bb659d19c",
+ "final_pool": {
+  "groups": 576,
+  "manifest_sha256": "9ce8f317a1b124616fbbf94f2e5420029ceef570130bd11dddc83a94f6db58ac",
+  "status": "UNCONSUMED",
+  "published": false
+ },
+ "contract_sha256": "adf750dffe5616832902c5c3fbceafd045fb587b56e371f289700570254590bf",
+ "freeze": {
+  "final_result_v2_sha256": "c8788dff198fc9804b7fd7bcd0a1f694afdeb6865d23689a9f88a4ec2ead6621",
+  "final_result_v1_sha256": "7ee8df59b811fabdadafeb40722fbd7c37cfdd2a5cc07e8d41226c9852ac2822"
+ },
+ "known_sha_label_error": "M3_FINAL_RESULT_v2 addendum_v2.finding.derivation_source.beta_freeze_sha256 = 0584fed6... is the DIRECTION_FREEZE.json sha; the actual BETA_FREEZE.json sha is 3e41744b...",
+ "source_files": [
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_final_result_v1/M3_FINAL_RESULT_v2.json",
+   "sha256": "c8788dff198fc9804b7fd7bcd0a1f694afdeb6865d23689a9f88a4ec2ead6621"
+  },
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_final_result_v1/FREEZE_v2.json",
+   "sha256": "97cd5103889e3a51c59c056108bc24601ee42ce5d116249dc905fbe58603e60d"
+  }
+ ]
+}

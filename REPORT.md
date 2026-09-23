@@ -3,6 +3,8 @@
 > **Historical artifact:** this report describes the earlier 400-sample pipeline.
 > The finalized 2,000-sample RRAE and frozen steering replication are documented
 > in the root [`README.md`](README.md), final config, and frozen-results summary.
+> The final project result is the generalized safety-direction program (M1 → M3′):
+> see [`docs/EXPERIMENTAL_HISTORY.md`](docs/EXPERIMENTAL_HISTORY.md).
 > Legacy B-vs-C analyses below are content-separation ablations, not the final
 > injection-mechanism direction.
 

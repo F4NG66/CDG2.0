@@ -1,0 +1,124 @@
+{
+ "schema": "CDG2_GENERALIZED_SAFETY_RESULT_SUMMARY_V1",
+ "experiment": "ALL",
+ "draft": null,
+ "status": "RECORDED_NOT_REPAIRED",
+ "directions_and_betas": {
+  "V_DIJA": {
+   "status": "CLEAN",
+   "beta": 74.77510070800781,
+   "beta_status": "CLEAN"
+  },
+  "V_RENELLM": {
+   "status": "CAVEATED",
+   "beta": 81.59530639648438,
+   "beta_status": "CAVEATED",
+   "cross_topic_construction_pairs": 157,
+   "construction_pairs_total": 199,
+   "beta_if_only_unaffected_42_pairs": 77.76337051391602
+  },
+  "V_ALL": {
+   "status": "CAVEATED_INHERITED",
+   "beta": 73.11751556396484,
+   "beta_status": "CAVEATED_INHERITED"
+  },
+  "generalized_safety_v1_directions": {
+   "status": "NOT_AFFECTED",
+   "answer": "NO — not affected. Separate dataset, separate construction script, separate era."
+  },
+  "rebuilt": false,
+  "recalibrated": false,
+  "root_cause_classification": "TOOLING_FAULT_WRONG_FILE_SOURCING",
+  "measurement_statement": "M1/M2 values remain measurements of the frozen interventions actually executed; the semantic interpretation of V_RENELLM and V_ALL (direction and dose) is weakened."
+ },
+ "m2_deviations": [
+  "D1_judge_label_spaces",
+  "D2_metric_contract_reference"
+ ],
+ "c_dija_build_dev_ambiguity": {
+  "ambiguous_or_malformed_rate_BUILD_pct": 47.5,
+  "ambiguous_or_malformed_rate_DEV_pct": 58.8,
+  "source_statement": "C_DIJA ambiguous_or_malformed rate is 47.5% (BUILD) / 58.8% (DEV) — well above M1 held-out's comparable rate. Generation..."
+ },
+ "m3prime_gate": {
+  "sparse_negative_class": {
+   "C_unnecessary_refusal": 10,
+   "B_safe_refusal_or_redirection": 110
+  },
+  "supervision": "case-level (not step-level)"
+ },
+ "deepseek_vs_assistant_agreement_BUILD_B": {
+  "authoritative_v2": {
+   "agreement": 538,
+   "overlapping_items": 611,
+   "agreement_rate": 0.8805
+  },
+  "superseded_v1": {
+   "agreement": 449,
+   "overlapping_items": 611,
+   "agreement_rate": 0.7349,
+   "note": "the 73.49% figure quoted in M3prime contract section 5 is this superseded v1 value"
+  },
+  "used_for_fitting": false
+ },
+ "final_pool_nonhealth_D_side_style_drift": {
+  "groups_affected": 115,
+  "reference": "xstest safe prompts, n=250 (the exhausted M1/M2 D-side source)",
+  "deltas_pp": {
+   "first_person": -25.7,
+   "health_keyword": -2.8,
+   "median_words": 3,
+   "question_form": -7.8
+  },
+  "applies_to": "final 576 pool non-health D-side (OR-Bench); M3prime contract notes it applies to NEW_DEV too"
+ },
+ "canonical_file_bindings": {
+  "v2_build_dev_and_direction_construction": {
+   "file": "ABCD_clean_v2_DIJA_Qwen_A_B_C_D.jsonl",
+   "sha256": "4ab0b3b5eae974575e882284f86affceca73b152b904d7110a3fab66b4ae8256",
+   "groups_bound": 400
+  },
+  "v2_2_official_canonical_and_m1_heldout": {
+   "file": "ABCD_clean_v2_2_OFFICIAL_DIJA_FINAL.jsonl",
+   "sha256": "4392afca6d8f6b788a848d0417c92807ce01aeb077a67d6424bf12d69138eaaf"
+  }
+ },
+ "source_files": [
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_renellm_construction_fault_audit_v1/SCOPE_AUDIT.json",
+   "sha256": "815dfcaa33aee33a3eb60f03d25a21146168986d373332c2d74bb2cdff0f5482"
+  },
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_renellm_construction_fault_audit_v1/CAVEATS_FOR_M3_CONTRACT_FREEZE.json",
+   "sha256": "4f41c237f6b611425c33dc8fa1684ebd055a4211de295cdb7b76bd2802773a3e"
+  },
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_renellm_construction_fault_audit_v1/CAVEATS_FOR_M3_CONTRACT_FREEZE_v2_beta_addendum.json",
+   "sha256": "ba465e6ae9e53aae799c8c217887e3b0aaf3609b6d3e40ccc8f6cea481a09959"
+  },
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_renellm_construction_fault_audit_v1/V1_DIRECTION_LINEAGE_CHECK_v3.json",
+   "sha256": "560014e4537a5240e34939a7f663dfd29f922afbc2c6b0eb3d5885a2fb489dae"
+  },
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_build_dev_judging_v1/DEV_MIN_SUPPORT_CHECK.json",
+   "sha256": "cd3e8a8cc4b0d01e9ce978e7231dbe87e5226febc75f784b091331f8c73ab1ae"
+  },
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_build_dev_judging_v2/DEV_MIN_SUPPORT_CHECK.json",
+   "sha256": "3ba980f9effe49471f20b2cca772410b9de20bfaa1671cac443b98fbd013d8d8"
+  },
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_final_pool_freeze_v1/FREEZE.json",
+   "sha256": "65ac2fb703b4c7bf6c136205c9d73472e789c88a845b6fab265e795e438e4107"
+  },
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_build_dev_freeze/DIJA_LINEAGE_BINDING.json",
+   "sha256": "0c5ac5433e385dca75797957a3cd124e7fe007ea823554247b45633f2ede9b80"
+  },
+  {
+   "path": "analysis_output/rrae_development/generalized_safety_v2_m3_final_result_v1/M3_FINAL_RESULT_v2.json",
+   "sha256": "c8788dff198fc9804b7fd7bcd0a1f694afdeb6865d23689a9f88a4ec2ead6621"
+  }
+ ]
+}

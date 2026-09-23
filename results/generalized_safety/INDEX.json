@@ -1,0 +1,37 @@
+{
+ "schema": "CDG2_GENERALIZED_SAFETY_RESULT_SUMMARY_V1",
+ "draft": null,
+ "sequence": [
+  {
+   "id": "M1",
+   "file": "m1_summary.json",
+   "status": "COMPLETE_FROZEN"
+  },
+  {
+   "id": "M2",
+   "file": "m2_summary.json",
+   "status": "COMPLETE_FROZEN"
+  },
+  {
+   "id": "M3",
+   "file": "m3_status.json",
+   "status": "CLOSED_NO_GO_INSUFFICIENT_DEV_SUPPORT",
+   "gate_fit_performed": false
+  },
+  {
+   "id": "M3prime",
+   "file": "m3prime_summary.json",
+   "status": "CLOSED_NO_GO_PATTERN_E",
+   "gate_fit_performed": true
+  }
+ ],
+ "lineage_and_limitations": "lineage_status.json",
+ "final_pool_consumed": false,
+ "final_576_pool": {
+  "status": "UNCONSUMED",
+  "manifest_sha256": "9ce8f317a1b124616fbbf94f2e5420029ceef570130bd11dddc83a94f6db58ac",
+  "published": false
+ },
+ "authoritative_handoff_sha256": "31e211372847f6158cd6647656b95d4fbbcb95945ffe9c138b8c6d7690330bcf",
+ "builder": "built from SHA-verified frozen artifacts; metric blocks copied verbatim, never recomputed"
+}
